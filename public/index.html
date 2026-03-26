@@ -139,7 +139,8 @@
   <div id="screen-quiz" class="screen"> <!-- Écran principal du quiz (affiché pendant les questions) -->
 
     <!-- Top bar -->
-    <div class="quiz-topbar"> <!-- Barre supérieure avec progression, score et timer -->
+    <div class="quiz-topbar"> <!-- Barre supérieure avec progression, score, timer et bouton quitter -->
+      <button id="btn-quit" class="btn-quit" title="Quitter le quiz et retourner au menu">✕ Quitter</button> <!-- Bouton pour abandonner la partie en cours et retourner à l'accueil -->
       <div class="qnb"> <!-- Indicateur de numéro de question -->
         Question <strong id="q-idx">1</strong> / <strong id="q-total">10</strong> <!-- "Question X / Y" (valeurs mises à jour par JS) -->
       </div>
@@ -282,6 +283,16 @@
   </div><!-- #screen-leaderboard : fin de l'écran classement -->
 
 </div><!-- #app : fin du conteneur principal de l'application -->
+
+<!-- ╔════════════════════════════════════════════════════════╗
+     ║  MODAL : AUTHENTIFICATION                             ║
+     ╚════════════════════════════════════════════════════════╝ -->
+<!-- Overlay plein écran affiché lors de la vérification du pseudo (nouveau compte ou connexion) -->
+<div id="modal-overlay" class="modal-overlay">
+  <div class="modal-box" id="modal-box">
+    <!-- Contenu injecté dynamiquement par app.js selon le cas (nouveau joueur ou pseudo déjà pris) -->
+  </div>
+</div>
 
 <script src="/js/app.js"></script> <!-- Chargement du script JavaScript principal (en fin de body pour que le DOM soit prêt) -->
 </body>

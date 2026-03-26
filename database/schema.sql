@@ -21,6 +21,7 @@ DROP TABLE IF EXISTS reponses;   -- Supprime la table reponses si elle existe (d
 DROP TABLE IF EXISTS questions;  -- Supprime la table questions si elle existe (doit être supprimée avant categories à cause des clés étrangères)
 DROP TABLE IF EXISTS scores;     -- Supprime la table scores si elle existe
 DROP TABLE IF EXISTS categories; -- Supprime la table categories en dernier (référencée par questions)
+DROP TABLE IF EXISTS users;      -- Supprime la table users si elle existe (comptes joueurs avec codes d'authentification)
 
 CREATE TABLE categories (                               -- Crée la table qui stocke les thèmes/catégories des questions
   id       INT UNSIGNED    NOT NULL AUTO_INCREMENT,     -- Identifiant unique auto-incrémenté (clé primaire)
@@ -355,6 +356,19 @@ VALUES (6,'Quel fruit tropical très parfumé et populaire à la Réunion ressem
 SET @q=LAST_INSERT_ID(); -- Mémorise l'ID de la question
 INSERT INTO reponses(question_id,texte,correcte) VALUES(@q,'Le letchi (litchi)',1),(@q,'Le longane',0),(@q,'Le ramboutan',0),(@q,'Le jacquier',0); -- 'Le letchi (litchi)' est la bonne réponse
 
+-- ----------------------------------------------------------------
+--  TABLE : users
+-- ----------------------------------------------------------------
+CREATE TABLE users (                                                        -- Crée la table des comptes joueurs pour l'authentification par code
+  id         INT UNSIGNED  NOT NULL AUTO_INCREMENT,                         -- Identifiant unique auto-incrémenté du joueur
+  pseudo     VARCHAR(80)   NOT NULL UNIQUE,                                 -- Pseudo unique du joueur (max 80 caractères, doit être unique)
+  code       CHAR(6)       NOT NULL,                                        -- Code personnel de 6 caractères (généré à l'inscription)
+  created_at DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,             -- Date et heure de création du compte (automatique)
+  PRIMARY KEY (id),                                                         -- Déclare id comme clé primaire
+  INDEX idx_pseudo (pseudo),                                               -- Index sur le pseudo pour accélérer les recherches par pseudo
+  INDEX idx_code   (pseudo, code)                                          -- Index composite pseudo+code pour accélérer la vérification d'authentification
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;       -- Moteur InnoDB avec UTF-8 complet
+
 -- ================================================================
 --  INDEX supplémentaires
 -- ================================================================
@@ -364,19 +378,28 @@ CREATE INDEX idx_reponses_q     ON reponses(question_id);   -- Index sur questio
 -- ================================================================
 --  VUE : Classement général (top scores)
 -- ================================================================
-CREATE OR REPLACE VIEW v_classement AS  -- Crée ou remplace la vue du classement (réutilisable dans l'API)
-  SELECT
-    ROW_NUMBER() OVER (ORDER BY score DESC, duree_sec ASC) AS rang, -- Numéro de rang calculé dynamiquement (meilleur score en premier, puis meilleur temps)
-    pseudo,      -- Pseudo du joueur
-    score,       -- Score total obtenu
-    nb_bonnes,   -- Nombre de bonnes réponses
-    nb_total,    -- Nombre total de questions jouées
-    ROUND(nb_bonnes * 100.0 / NULLIF(nb_total,0), 1)     AS pct_bonnes, -- Pourcentage de bonnes réponses arrondi à 1 décimale (NULLIF évite la division par zéro)
-    duree_sec,   -- Durée de la partie en secondes
-    created_at   -- Date et heure de la partie
-  FROM scores                          -- Source : table des scores
-  ORDER BY score DESC, duree_sec ASC   -- Tri : meilleur score d'abord, puis meilleur temps en cas d'égalité
-  LIMIT 100;                           -- Limite aux 100 meilleurs scores pour les performances
+CREATE OR REPLACE VIEW v_classement AS  -- Crée ou remplace la vue du classement (un seul score par joueur : le meilleur)
+  WITH ranked AS (                     -- CTE (Common Table Expression) : classe les scores par joueur
+    SELECT *,
+      ROW_NUMBER() OVER (              -- Numérote les scores pour chaque joueur (PARTITION BY pseudo)
+        PARTITION BY pseudo            -- Repart depuis 1 pour chaque pseudo distinct
+        ORDER BY score DESC, duree_sec ASC -- Classe : meilleur score d'abord, puis meilleur temps
+      ) AS rn                          -- rn = 1 désigne le meilleur score de chaque joueur
+    FROM scores                        -- Source : tous les scores enregistrés
+  )
+  SELECT                               -- Sélectionne uniquement le meilleur score de chaque joueur
+    ROW_NUMBER() OVER (ORDER BY score DESC, duree_sec ASC) AS rang, -- Rang global calculé sur les meilleurs scores
+    pseudo,                            -- Pseudo du joueur
+    score,                             -- Meilleur score du joueur
+    nb_bonnes,                         -- Nombre de bonnes réponses pour cette partie
+    nb_total,                          -- Nombre total de questions pour cette partie
+    ROUND(nb_bonnes * 100.0 / NULLIF(nb_total, 0), 1) AS pct_bonnes, -- Pourcentage de réussite (NULLIF évite la division par zéro)
+    duree_sec,                         -- Durée de la meilleure partie en secondes
+    created_at                         -- Date de la meilleure partie
+  FROM ranked                          -- Source : scores classés par joueur
+  WHERE rn = 1                         -- Garde uniquement le meilleur score de chaque joueur
+  ORDER BY score DESC, duree_sec ASC   -- Tri final : meilleur score en premier, meilleur temps en cas d'égalité
+  LIMIT 100;                           -- Limite aux 100 meilleurs joueurs pour les performances
 
 -- ================================================================
 SELECT CONCAT(                                           -- Affiche un message de confirmation après l'import du schéma

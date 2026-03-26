@@ -13,6 +13,8 @@
    ════════════════════════════════════════════════════════════ */
 const state = {                // Objet centralisé qui contient tout l'état de l'application (pattern single source of truth)
   pseudo      : '',            // Pseudo du joueur saisi sur l'écran d'accueil
+  authPseudo  : '',            // Pseudo validé après authentification (via register ou login)
+  userCode    : '',            // Code personnel du joueur (généré à l'inscription, utilisé pour la reconnexion)
   questions   : [],            // Tableau des questions chargées depuis l'API pour la partie en cours
   idx         : 0,             // Index de la question actuellement affichée (commence à 0)
   score       : 0,             // Score total accumulé pendant la partie
@@ -201,6 +203,115 @@ function makeCatTile(cat, selected) {                          // Fonction qui c
 }
 
 /* ════════════════════════════════════════════════════════════
+   AUTHENTIFICATION PAR CODE
+   ════════════════════════════════════════════════════════════ */
+async function checkPseudo(pseudo) {                                         // Tente d'enregistrer le pseudo (nouveau joueur) ou détecte un conflit
+  try {                                                                      // Bloc try pour capturer les erreurs réseau
+    const res  = await fetch('/api/auth/register', {                        // Envoie la requête d'inscription à l'API
+      method : 'POST',                                                       // Méthode POST pour créer un compte
+      headers: { 'Content-Type': 'application/json' },                      // Indique que le corps est du JSON
+      body   : JSON.stringify({ pseudo }),                                   // Envoie le pseudo dans le corps de la requête
+    });
+    const data = await res.json();                                           // Parse la réponse JSON de l'API
+
+    if (res.status === 201) {                                                // 201 Created : nouveau compte créé avec succès
+      showCodeModal(data.pseudo, data.code);                                // Affiche le modal avec le code généré
+    } else if (res.status === 409) {                                         // 409 Conflict : pseudo déjà pris par un autre joueur
+      showPseudoTakenModal(pseudo, data.suggestions || []);                 // Affiche le modal de reconnexion avec les suggestions
+    } else {                                                                 // Autre erreur inattendue du serveur
+      toastMsg('Erreur serveur. Réessaie.', 'error');                       // Affiche un toast d'erreur
+    }
+  } catch {                                                                  // Bloc catch : exécuté si une erreur réseau survient
+    toastMsg('Impossible de contacter le serveur.', 'error');               // Affiche un toast d'erreur réseau
+  }
+}
+
+function showCodeModal(pseudo, code) {                               // Affiche le modal de bienvenue avec le code du nouveau joueur
+  state.authPseudo = pseudo;                                         // Sauvegarde le pseudo authentifié dans l'état global
+  state.userCode   = code;                                           // Sauvegarde le code dans l'état global
+
+  $('modal-box').innerHTML = `
+    <div class="modal-icon">🎉</div>
+    <h3 class="modal-title">Bienvenue, ${escHtml(pseudo)} !</h3>
+    <p class="modal-sub">Ton code personnel :</p>
+    <div class="code-display">${escHtml(code)}</div>
+    <p class="modal-warning">⚠️ Note bien ce code ! Tu en auras besoin pour te reconnecter plus tard.</p>
+    <button class="btn btn-primary modal-btn" id="modal-confirm">J'ai noté mon code → Commencer !</button>
+  `;                                                                 // Injecte le contenu HTML du modal : emoji, pseudo, code, avertissement, bouton
+
+  $('modal-overlay').classList.add('show');                          // Affiche le modal en ajoutant la classe 'show'
+  $('modal-confirm').addEventListener('click', () => {              // Écoute le clic sur le bouton de confirmation
+    $('modal-overlay').classList.remove('show');                    // Ferme le modal
+    doStartQuiz();                                                   // Lance le quiz après confirmation
+  });
+}
+
+function showPseudoTakenModal(pseudo, suggestions) {                                    // Affiche le modal de reconnexion (pseudo déjà pris)
+  const suggestionsHtml = suggestions                                                   // Génère le HTML des chips de suggestions
+    .map(s => `<button class="suggestion-chip" data-pseudo="${escHtml(s)}">${escHtml(s)}</button>`) // Crée un bouton par suggestion
+    .join('');                                                                          // Assemble les boutons en HTML
+
+  $('modal-box').innerHTML = `
+    <div class="modal-icon">🔒</div>
+    <h3 class="modal-title">Pseudo déjà utilisé</h3>
+    <p class="modal-sub">C'est ton compte ? Entre ton code :</p>
+    <div class="code-input-row">
+      <input type="text" id="modal-code-input" class="input-code" maxlength="6"
+             placeholder="Ex : AB3K7M" autocomplete="off" spellcheck="false" />
+      <button class="btn btn-primary" id="modal-login-btn">Se connecter</button>
+    </div>
+    <div id="modal-error" class="modal-error"></div>
+    ${suggestions.length ? `
+      <div class="modal-divider">Ou choisis un pseudo similaire</div>
+      <div class="suggestion-chips">${suggestionsHtml}</div>
+    ` : ''}
+  `;                                                                                    // Injecte le contenu HTML : champ code, bouton connexion, suggestions
+
+  $('modal-overlay').classList.add('show');                                             // Affiche le modal
+
+  $('modal-login-btn').addEventListener('click', () => loginWithCode(pseudo));          // Clic "Se connecter" → vérifie le code
+  $('modal-code-input').addEventListener('keydown', e => {                             // Touche Entrée dans le champ code → vérifie aussi
+    if (e.key === 'Enter') loginWithCode(pseudo);
+  });
+
+  $('modal-box').querySelectorAll('.suggestion-chip').forEach(chip => {                // Clic sur une suggestion → tente de s'inscrire avec ce pseudo
+    chip.addEventListener('click', () => {
+      $('modal-overlay').classList.remove('show');                                     // Ferme le modal avant de tenter le nouveau pseudo
+      $('input-pseudo').value = chip.dataset.pseudo;                                  // Pré-remplit le champ avec le pseudo suggéré
+      checkPseudo(chip.dataset.pseudo);                                               // Relance la vérification avec le nouveau pseudo
+    });
+  });
+}
+
+async function loginWithCode(pseudo) {                                            // Authentifie un joueur existant avec son code
+  const code = $('modal-code-input').value.trim().toUpperCase();                  // Récupère et normalise le code (majuscules)
+  if (code.length !== 6) {                                                        // Vérifie que le code fait exactement 6 caractères
+    $('modal-error').textContent = 'Le code doit faire 6 caractères.';            // Affiche une erreur de validation
+    return;                                                                       // Interrompt si le code est trop court
+  }
+
+  try {                                                                           // Bloc try pour capturer les erreurs réseau
+    const res  = await fetch('/api/auth/login', {                                // Envoie la requête de connexion à l'API
+      method : 'POST',                                                            // Méthode POST
+      headers: { 'Content-Type': 'application/json' },                           // Corps JSON
+      body   : JSON.stringify({ pseudo, code }),                                 // Envoie pseudo + code pour vérification
+    });
+    const data = await res.json();                                                // Parse la réponse JSON
+
+    if (data.success) {                                                           // Si l'authentification réussit
+      state.authPseudo = pseudo;                                                  // Sauvegarde le pseudo authentifié
+      state.userCode   = code;                                                    // Sauvegarde le code validé
+      $('modal-overlay').classList.remove('show');                               // Ferme le modal
+      doStartQuiz();                                                              // Lance le quiz
+    } else {                                                                      // Si le code est incorrect
+      $('modal-error').textContent = '❌ Code incorrect. Vérifie et réessaie.'; // Affiche le message d'erreur dans le modal
+    }
+  } catch {                                                                       // Bloc catch : erreur réseau
+    $('modal-error').textContent = 'Erreur réseau. Réessaie.';                   // Affiche un message d'erreur réseau
+  }
+}
+
+/* ════════════════════════════════════════════════════════════
    DÉMARRER LE QUIZ
    ════════════════════════════════════════════════════════════ */
 async function startQuiz() {                             // Fonction asynchrone déclenchée lors du clic sur "Démarrer"
@@ -211,11 +322,21 @@ async function startQuiz() {                             // Fonction asynchrone 
     return;                                            // Interrompt l'exécution si le pseudo est invalide
   }
 
-  state.pseudo   = pseudo;  // Sauvegarde le pseudo validé dans l'état global
-  state.score    = 0;        // Réinitialise le score à 0 pour une nouvelle partie
-  state.nbBonnes = 0;        // Réinitialise le compteur de bonnes réponses
-  state.idx      = 0;        // Remet l'index de question à 0 (première question)
-  state.answered = false;    // Réinitialise l'état de réponse
+  // Si le joueur est déjà authentifié avec ce pseudo, relance directement sans re-saisir le code
+  if (state.authPseudo && state.authPseudo === pseudo) {  // Vérifie si une session active existe pour ce pseudo
+    await doStartQuiz();                                   // Lance directement le quiz sans repasser par l'auth
+    return;                                               // Interrompt pour éviter d'appeler checkPseudo
+  }
+
+  await checkPseudo(pseudo); // Vérifie si le pseudo est disponible (nouveau joueur) ou pris (reconnexion)
+}
+
+async function doStartQuiz() {                                                  // Lance effectivement le quiz après l'authentification
+  state.pseudo   = state.authPseudo;   // Utilise le pseudo authentifié comme pseudo de jeu
+  state.score    = 0;                  // Réinitialise le score à 0 pour une nouvelle partie
+  state.nbBonnes = 0;                  // Réinitialise le compteur de bonnes réponses
+  state.idx      = 0;                  // Remet l'index de question à 0 (première question)
+  state.answered = false;              // Réinitialise l'état de réponse
 
   showScreen('loading'); // Affiche l'écran de chargement pendant la récupération des questions
 
@@ -240,6 +361,19 @@ async function startQuiz() {                             // Fonction asynchrone 
     toastMsg('Impossible de contacter le serveur.', 'error'); // Affiche un toast d'erreur réseau
     showScreen('home');                                        // Retourne à l'écran d'accueil
   }
+}
+
+/* ════════════════════════════════════════════════════════════
+   QUITTER LE QUIZ
+   ════════════════════════════════════════════════════════════ */
+function quitQuiz() {                    // Abandonne la partie en cours et retourne au menu principal
+  clearInterval(state.timerTick);        // Arrête le minuteur pour éviter qu'il continue en arrière-plan
+  state.questions = [];                  // Vide le tableau des questions de la partie abandonnée
+  state.idx       = 0;                   // Remet l'index à zéro
+  state.score     = 0;                   // Remet le score à zéro (pas sauvegardé car partie non terminée)
+  state.nbBonnes  = 0;                   // Remet le compteur de bonnes réponses à zéro
+  state.answered  = false;               // Réinitialise l'état de réponse
+  showScreen('home');                    // Retourne à l'écran d'accueil sans sauvegarder le score
 }
 
 /* ════════════════════════════════════════════════════════════
@@ -485,9 +619,12 @@ document.addEventListener('DOMContentLoaded', async () => {  // Attend que le DO
   });
 
   // ── Boutons écran home ───────────────────────────────────
-  $('btn-start').addEventListener('click', startQuiz);                                                 // Bouton "Démarrer" → lance le quiz
-  $('input-pseudo').addEventListener('keydown', e => { if (e.key === 'Enter') startQuiz(); });         // Touche Entrée dans le champ pseudo → lance aussi le quiz
+  $('btn-start').addEventListener('click', startQuiz);                                                 // Bouton "Démarrer" → vérifie le pseudo puis lance le quiz
+  $('input-pseudo').addEventListener('keydown', e => { if (e.key === 'Enter') startQuiz(); });         // Touche Entrée dans le champ pseudo → déclenche aussi le quiz
   $('btn-lb').addEventListener('click', showLeaderboard);                                              // Bouton "Classement" → affiche le classement
+
+  // ── Bouton Quitter (quiz en cours) ──────────────────────
+  $('btn-quit').addEventListener('click', quitQuiz); // Bouton "✕ Quitter" → abandonne la partie sans sauvegarder le score
 
   // ── Bouton question suivante ─────────────────────────────
   $('btn-next').addEventListener('click', () => {           // Clic sur "Question suivante" ou "Voir mes résultats"
@@ -497,7 +634,10 @@ document.addEventListener('DOMContentLoaded', async () => {  // Attend que le DO
   });
 
   // ── Boutons écran résultats ──────────────────────────────
-  $('btn-replay').addEventListener('click', () => showScreen('home'));        // Bouton "Rejouer" → retourne à l'écran d'accueil
+  $('btn-replay').addEventListener('click', () => {                         // Bouton "Rejouer" → retourne à l'écran d'accueil
+    showScreen('home');                                                     // Affiche l'écran d'accueil
+    if (state.authPseudo) $('input-pseudo').value = state.authPseudo;      // Pré-remplit le pseudo pour éviter de re-saisir le code
+  });
   $('btn-lb-result').addEventListener('click', showLeaderboard);              // Bouton "Classement" depuis les résultats → affiche le classement
 
   // ── Retour classement → home ─────────────────────────────

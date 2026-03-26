@@ -770,3 +770,137 @@ body::after { /* Pseudo-élément pour ajouter une texture granuleuse subtile su
   .question-card { padding: 24px 18px; } /* Réduction du padding de la carte question sur mobile */
   .hero-title { font-size: clamp(2.4rem, 10vw, 4rem); } /* Titre plus petit sur mobile */
 }
+
+/* ── Bouton Quitter (écran quiz) ────────────────────────────── */
+.btn-quit { /* Bouton compact dans la topbar du quiz pour abandonner la partie */
+  background: transparent; /* Fond transparent pour un look discret */
+  border: 1px solid rgba(255,69,0,.4); /* Bordure rouge-orange subtile */
+  color: var(--lava); /* Texte couleur lave */
+  border-radius: var(--r); /* Coins arrondis standards */
+  padding: 6px 13px; /* Espacement compact adapté à la topbar */
+  font-size: .78rem; /* Petite taille pour ne pas surcharger la topbar */
+  font-weight: 600; /* Texte semi-gras */
+  cursor: pointer; /* Curseur pointeur pour signaler l'interactivité */
+  transition: background var(--t) var(--ease), color var(--t) var(--ease); /* Transition fluide au survol */
+  white-space: nowrap; /* Empêche le texte de passer à la ligne */
+}
+.btn-quit:hover { /* État survol du bouton quitter */
+  background: rgba(255,69,0,.18); /* Fond rouge-orange semi-transparent */
+  color: var(--ember); /* Texte un peu plus lumineux */
+}
+
+/* ── Modal Authentification ─────────────────────────────────── */
+.modal-overlay { /* Overlay plein écran semi-opaque pour le modal d'authentification */
+  position: fixed; /* Fixé à la fenêtre, indépendant du scroll */
+  inset: 0; /* Couvre tout l'écran (top/right/bottom/left = 0) */
+  background: rgba(13,13,20,.85); /* Fond très sombre semi-transparent (couleur bg-900 à 85%) */
+  backdrop-filter: blur(6px); /* Flou de l'arrière-plan (glassmorphism) */
+  display: flex; /* Flexbox pour centrer le modal */
+  align-items: center; /* Centre verticalement */
+  justify-content: center; /* Centre horizontalement */
+  z-index: 1000; /* Au-dessus de tous les autres éléments */
+  opacity: 0; /* Invisible par défaut */
+  pointer-events: none; /* Non-interactif par défaut */
+  transition: opacity .25s var(--ease); /* Transition d'apparition fluide */
+}
+.modal-overlay.show { /* Classe ajoutée par JS pour afficher le modal */
+  opacity: 1; /* Rend le modal visible */
+  pointer-events: auto; /* Réactive l'interactivité */
+}
+.modal-box { /* Boîte de contenu du modal */
+  background: var(--bg-700); /* Fond sombre niveau 3 */
+  border: 1px solid var(--border-hi); /* Bordure légèrement visible */
+  border-radius: var(--r-xl); /* Grands coins arrondis */
+  padding: 36px 32px; /* Espacement généreux à l'intérieur */
+  max-width: 420px; /* Largeur maximale de la boîte */
+  width: calc(100% - 40px); /* Largeur responsive avec marges latérales */
+  text-align: center; /* Contenu centré */
+  box-shadow: 0 24px 64px rgba(0,0,0,.6), 0 0 0 1px rgba(255,69,0,.08); /* Ombre profonde + légère lueur */
+  transform: translateY(12px); /* Décalage initial vers le bas pour l'animation */
+  transition: transform .3s var(--ease); /* Transition de la translation */
+}
+.modal-overlay.show .modal-box { transform: translateY(0); } /* Monte à la position finale quand le modal s'ouvre */
+.modal-icon { font-size: 2.6rem; margin-bottom: 10px; } /* Grand emoji en haut du modal */
+.modal-title { /* Titre principal du modal */
+  font-family: 'Syne', sans-serif; /* Police de titre */
+  font-size: 1.3rem; /* Taille de titre */
+  font-weight: 700; /* Gras */
+  margin-bottom: 8px; /* Espace sous le titre */
+}
+.modal-sub { color: var(--text-muted); font-size: .9rem; margin-bottom: 18px; } /* Sous-titre du modal en texte atténué */
+.code-display { /* Affichage du code personnel généré */
+  font-family: 'JetBrains Mono', monospace; /* Police monospace pour la lisibilité du code */
+  font-size: 2.1rem; /* Grande taille pour faciliter la copie */
+  font-weight: 600; /* Semi-gras */
+  letter-spacing: .25em; /* Espacement important entre les caractères */
+  background: var(--bg-900); /* Fond très sombre */
+  border: 1px solid rgba(255,69,0,.4); /* Bordure lave */
+  border-radius: var(--r); /* Coins arrondis */
+  padding: 14px 20px; /* Espacement intérieur */
+  margin: 0 auto 18px; /* Centré avec espace sous */
+  color: var(--amber); /* Couleur ambre pour le code */
+  display: inline-block; /* S'adapte à la largeur du contenu */
+  width: 100%; /* Pleine largeur */
+}
+.modal-warning { /* Avertissement sur la nécessité de noter le code */
+  font-size: .82rem; /* Petite taille */
+  color: var(--amber); /* Couleur ambre pour attirer l'attention */
+  margin-bottom: 24px; /* Espace avant le bouton */
+  padding: 10px 14px; /* Espacement interne */
+  background: rgba(255,179,71,.08); /* Fond ambre très subtil */
+  border-radius: var(--r); /* Coins arrondis */
+}
+.modal-btn { width: 100%; justify-content: center; } /* Bouton pleine largeur dans le modal */
+.code-input-row { /* Rangée contenant l'input de code et le bouton connexion */
+  display: flex; /* Flexbox horizontal */
+  gap: 10px; /* Espace entre l'input et le bouton */
+  margin-bottom: 12px; /* Espace sous la rangée */
+}
+.input-code { /* Champ de saisie du code personnel (reconnexion) */
+  flex: 1; /* Prend tout l'espace disponible dans la rangée */
+  background: var(--bg-900); /* Fond très sombre */
+  border: 1.5px solid var(--border-hi); /* Bordure visible */
+  border-radius: var(--r); /* Coins arrondis */
+  color: var(--text); /* Texte blanc chaud */
+  padding: 10px 14px; /* Espacement interne */
+  font-family: 'JetBrains Mono', monospace; /* Police monospace pour le code */
+  font-size: 1rem; /* Taille normale */
+  letter-spacing: .12em; /* Léger espacement entre les caractères */
+  text-transform: uppercase; /* Force les majuscules côté CSS */
+  outline: none; /* Supprime le contour par défaut */
+  transition: border-color var(--t) var(--ease); /* Transition fluide du focus */
+}
+.input-code:focus { border-color: var(--lava); } /* Bordure lave au focus pour signaler l'état actif */
+.modal-error { /* Message d'erreur d'authentification dans le modal */
+  color: var(--lava); /* Texte couleur lave pour signaler l'erreur */
+  font-size: .84rem; /* Petite taille */
+  min-height: 20px; /* Hauteur minimale pour éviter les sauts de mise en page */
+  margin-bottom: 10px; /* Espace sous le message */
+}
+.modal-divider { /* Séparateur textuel entre les sections du modal */
+  font-size: .78rem; /* Petite taille */
+  color: var(--text-dim); /* Texte très atténué */
+  margin: 16px 0 12px; /* Marges verticales pour aérer */
+  text-transform: uppercase; /* Texte en majuscules pour l'aspect étiquette */
+  letter-spacing: .06em; /* Léger espacement */
+}
+.suggestion-chips { /* Conteneur des chips de suggestion de pseudo */
+  display: flex; /* Flexbox horizontal */
+  flex-wrap: wrap; /* Retour à la ligne si nécessaire */
+  gap: 8px; /* Espace entre les chips */
+  justify-content: center; /* Centré */
+}
+.suggestion-chip { /* Chip individuelle de suggestion de pseudo */
+  background: var(--surface); /* Fond translucide */
+  border: 1px solid var(--border-hi); /* Bordure visible */
+  border-radius: 99px; /* Pilule arrondie */
+  color: var(--text); /* Texte blanc chaud */
+  padding: 7px 16px; /* Espacement compact */
+  font-size: .85rem; /* Légèrement réduit */
+  cursor: pointer; /* Curseur pointeur */
+  transition: background var(--t) var(--ease), border-color var(--t) var(--ease); /* Transition fluide */
+}
+.suggestion-chip:hover { /* État survol des chips de suggestion */
+  background: var(--surface-hi); /* Fond plus visible */
+  border-color: var(--lava); /* Bordure lave */
+}
