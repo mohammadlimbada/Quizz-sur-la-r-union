@@ -79,14 +79,16 @@
       <!-- Pseudo -->
       <div class="config-section"> <!-- Section de saisie du pseudo -->
         <label class="config-label" for="input-pseudo">// Ton pseudo</label> <!-- Label associé au champ (for="input-pseudo" améliore l'accessibilité) -->
+        <!-- Champ de saisie du pseudo : type texte, limité à 80 caractères (cohérent avec la BDD),
+             sans autocomplétion ni correcteur orthographique pour une saisie libre -->
         <input
-          type="text" <!-- Type texte pour la saisie du pseudo -->
-          id="input-pseudo" <!-- ID référencé par le label et ciblé par app.js -->
-          class="input-pseudo" <!-- Classe CSS pour le style -->
-          placeholder="Ex : Réunionnais974, Piton_Master…" <!-- Texte indicatif dans le champ vide -->
-          maxlength="80" <!-- Limite la saisie à 80 caractères (cohérent avec la BDD) -->
-          autocomplete="off" <!-- Désactive l'autocomplétion du navigateur -->
-          spellcheck="false" <!-- Désactive la vérification orthographique -->
+          type="text"
+          id="input-pseudo"
+          class="input-pseudo"
+          placeholder="Ex : Réunionnais974, Piton_Master…"
+          maxlength="80"
+          autocomplete="off"
+          spellcheck="false"
         />
       </div>
 
