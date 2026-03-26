@@ -1,0 +1,286 @@
+<!DOCTYPE html> <!-- Déclaration du type de document HTML5 (obligatoire en première ligne) -->
+<html lang="fr"> <!-- Balise racine HTML avec la langue française définie (important pour l'accessibilité et le SEO) -->
+<head> <!-- Section d'en-tête : métadonnées, liens CSS, titre (invisible pour l'utilisateur) -->
+  <meta charset="UTF-8" /> <!-- Encodage UTF-8 pour supporter les caractères spéciaux (accents, emojis) -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" /> <!-- Viewport responsive : adapte l'affichage à la largeur de l'appareil (mobile-friendly) -->
+  <title>Quiz Réunion 🌋 — Géographie & Culture de l'île</title> <!-- Titre de l'onglet du navigateur -->
+  <meta name="description" content="Quiz interactif sur l'île de la Réunion — Géographie, Histoire, Culture — BTS SIO SLAM" /> <!-- Description pour les moteurs de recherche (SEO) -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌋</text></svg>" /> <!-- Favicon SVG inline : emoji volcan (évite un fichier favicon.ico séparé) -->
+  <link rel="stylesheet" href="/css/style.css" /> <!-- Lien vers la feuille de style principale du projet -->
+</head>
+<body> <!-- Corps du document : tout le contenu visible de la page -->
+
+<!-- Canvas fond animé -->
+<canvas id="canvas-bg"></canvas> <!-- Élément canvas pour l'animation de particules de lave en arrière-plan (géré par app.js) -->
+
+<!-- Toasts -->
+<div id="toasts"></div> <!-- Conteneur vide pour les notifications toast (rempli dynamiquement par app.js) -->
+
+<div id="app"> <!-- Conteneur principal de toute l'application (les écrans sont affichés à l'intérieur) -->
+
+  <!-- ╔════════════════════════════════════════════════════════╗
+       ║  HEADER                                               ║
+       ╚════════════════════════════════════════════════════════╝ -->
+  <header class="site-header"> <!-- En-tête fixe affiché en haut de toutes les pages -->
+    <div class="logo"> <!-- Logo de l'application (emoji volcan + titre + tagline) -->
+      <span class="logo-volcano">🌋</span> <!-- Emoji volcan animé (pulsation via CSS) -->
+      <div> <!-- Bloc texte du logo -->
+        <div class="logo-title">Quiz Réunion</div> <!-- Titre principal du logo -->
+        <div class="logo-tagline">Île de la Réunion · 974</div> <!-- Sous-titre avec le code département -->
+      </div>
+    </div>
+    <div class="header-pill">BTS SIO · SLAM</div> <!-- Badge identifiant le contexte scolaire du projet -->
+  </header>
+
+  <!-- ╔════════════════════════════════════════════════════════╗
+       ║  SCREEN : LOADING                                     ║
+       ╚════════════════════════════════════════════════════════╝ -->
+  <div id="screen-loading" class="screen"> <!-- Écran de chargement affiché pendant la récupération des questions depuis l'API -->
+    <div class="loading-center"> <!-- Conteneur centré pour le loader -->
+      <div class="ring-loader"></div> <!-- Spinner CSS animé (anneau qui tourne) -->
+      <p>Chargement des questions…</p> <!-- Message de chargement affiché sous le spinner -->
+    </div>
+  </div>
+
+  <!-- ╔════════════════════════════════════════════════════════╗
+       ║  SCREEN : HOME                                        ║
+       ╚════════════════════════════════════════════════════════╝ -->
+  <div id="screen-home" class="screen active"> <!-- Écran d'accueil affiché par défaut au chargement (classe 'active') -->
+
+    <!-- Hero -->
+    <div class="hero"> <!-- Section héros : titre accrocheur et statistiques globales -->
+      <div class="hero-eyebrow">🌺 Connais-tu vraiment ton île ?</div> <!-- Bandeau accrocheur au-dessus du titre -->
+      <h1 class="hero-title">Île de la<br>Réunion</h1> <!-- Titre principal avec saut de ligne -->
+      <p class="hero-sub"> <!-- Sous-titre descriptif -->
+        Géographie, histoire, culture, nature…
+        Prouve que tu es un vrai <strong>expert du 974</strong> ! <!-- Texte en gras pour mettre en valeur l'expression clé -->
+      </p>
+
+      <!-- Stats globales -->
+      <div class="stats-row" style="margin-bottom:52px;"> <!-- Rangée de 3 statistiques globales (remplies dynamiquement par JS) -->
+        <div class="stat-cell"> <!-- Cellule statistique : nombre de parties jouées -->
+          <div class="stat-val" id="stat-parties">—</div> <!-- Valeur des parties (—  par défaut, remplacé par JS) -->
+          <div class="stat-label">Parties</div> <!-- Label de la statistique -->
+        </div>
+        <div class="stat-cell"> <!-- Cellule statistique : pourcentage moyen de bonnes réponses -->
+          <div class="stat-val" id="stat-moy">—</div> <!-- Valeur moyenne (remplie par JS depuis l'API) -->
+          <div class="stat-label">Moyenne</div> <!-- Label de la statistique -->
+        </div>
+        <div class="stat-cell"> <!-- Cellule statistique : meilleur score enregistré -->
+          <div class="stat-val" id="stat-record">—</div> <!-- Valeur du record (remplie par JS depuis l'API) -->
+          <div class="stat-label">Record</div> <!-- Label de la statistique -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Panneau configuration -->
+    <div class="card config-box"> <!-- Carte contenant tous les paramètres de configuration du quiz -->
+
+      <!-- Pseudo -->
+      <div class="config-section"> <!-- Section de saisie du pseudo -->
+        <label class="config-label" for="input-pseudo">// Ton pseudo</label> <!-- Label associé au champ (for="input-pseudo" améliore l'accessibilité) -->
+        <input
+          type="text" <!-- Type texte pour la saisie du pseudo -->
+          id="input-pseudo" <!-- ID référencé par le label et ciblé par app.js -->
+          class="input-pseudo" <!-- Classe CSS pour le style -->
+          placeholder="Ex : Réunionnais974, Piton_Master…" <!-- Texte indicatif dans le champ vide -->
+          maxlength="80" <!-- Limite la saisie à 80 caractères (cohérent avec la BDD) -->
+          autocomplete="off" <!-- Désactive l'autocomplétion du navigateur -->
+          spellcheck="false" <!-- Désactive la vérification orthographique -->
+        />
+      </div>
+
+      <div class="divider"></div> <!-- Séparateur horizontal entre les sections de configuration -->
+
+      <!-- Catégorie -->
+      <div class="config-section"> <!-- Section de sélection de la catégorie -->
+        <span class="config-label">// Catégorie</span> <!-- Label de la section catégorie -->
+        <div class="cat-grid" id="cat-grid"> <!-- Grille des tuiles de catégorie (remplie dynamiquement par JS) -->
+          <!-- Injecté par JS -->
+          <div class="loading-center" style="padding:30px;grid-column:1/-1"> <!-- Loader affiché pendant le chargement des catégories depuis l'API -->
+            <div class="ring-loader"></div> <!-- Spinner CSS en attendant les données -->
+          </div>
+        </div>
+      </div>
+
+      <div class="divider"></div> <!-- Séparateur horizontal entre catégorie et nombre de questions -->
+
+      <!-- Nombre de questions -->
+      <div class="config-section"> <!-- Section de sélection du nombre de questions -->
+        <span class="config-label">// Nombre de questions</span> <!-- Label de la section -->
+        <div class="nb-row" id="nb-row"> <!-- Rangée de chips de sélection (gérée par JS pour la sélection) -->
+          <button class="nb-chip" data-n="5">5</button> <!-- Chip pour 5 questions -->
+          <button class="nb-chip active" data-n="10">10</button> <!-- Chip pour 10 questions (sélectionné par défaut via 'active') -->
+          <button class="nb-chip" data-n="15">15</button> <!-- Chip pour 15 questions -->
+          <button class="nb-chip" data-n="20">20</button> <!-- Chip pour 20 questions -->
+          <button class="nb-chip" data-n="34">Toutes</button> <!-- Chip pour toutes les questions (34 au total) -->
+        </div>
+      </div>
+
+    </div><!-- .config-box : fin du panneau de configuration -->
+
+    <!-- Actions -->
+    <div class="home-actions"> <!-- Rangée de boutons d'action de l'écran d'accueil -->
+      <button id="btn-start" class="btn btn-primary"> <!-- Bouton principal pour démarrer le quiz -->
+        Commencer <span class="icon">→</span> <!-- Texte avec icône flèche (animée au survol via CSS) -->
+      </button>
+      <button id="btn-lb" class="btn btn-outline"> <!-- Bouton secondaire pour accéder au classement -->
+        🏆 Classement
+      </button>
+    </div>
+
+  </div><!-- #screen-home : fin de l'écran d'accueil -->
+
+  <!-- ╔════════════════════════════════════════════════════════╗
+       ║  SCREEN : QUIZ                                        ║
+       ╚════════════════════════════════════════════════════════╝ -->
+  <div id="screen-quiz" class="screen"> <!-- Écran principal du quiz (affiché pendant les questions) -->
+
+    <!-- Top bar -->
+    <div class="quiz-topbar"> <!-- Barre supérieure avec progression, score et timer -->
+      <div class="qnb"> <!-- Indicateur de numéro de question -->
+        Question <strong id="q-idx">1</strong> / <strong id="q-total">10</strong> <!-- "Question X / Y" (valeurs mises à jour par JS) -->
+      </div>
+      <div class="score-chip"> <!-- Affichage du score en temps réel -->
+        ⚡&nbsp;<span id="score-live">0</span>&nbsp;pts <!-- Icône éclair + score + "pts" (score mis à jour par JS) -->
+      </div>
+      <!-- Timer -->
+      <div class="timer-wrap"> <!-- Conteneur du minuteur circulaire SVG -->
+        <svg width="52" height="52" viewBox="0 0 52 52"> <!-- SVG du timer : 52x52 pixels -->
+          <circle class="timer-bg"  cx="26" cy="26" r="22" /> <!-- Cercle de fond gris du timer (piste du cercle) -->
+          <circle class="timer-arc" cx="26" cy="26" r="22" id="timer-arc" /> <!-- Arc orange animé qui diminue (stroke-dashoffset contrôlé par JS) -->
+        </svg>
+        <div class="timer-num" id="timer-num">20</div> <!-- Chiffre des secondes restantes (mis à jour par JS) -->
+      </div>
+    </div>
+
+    <!-- Barre de progression -->
+    <div class="progress-bar"> <!-- Barre de progression du quiz -->
+      <div class="progress-bar-fill" id="q-progress" style="width:0%"></div> <!-- Remplissage animé (width mis à jour par JS selon la progression) -->
+    </div>
+
+    <!-- Meta (catégorie + difficulté) -->
+    <div class="q-meta"> <!-- Zone de métadonnées de la question -->
+      <span class="badge badge-cat" id="q-cat-badge">🌋 Catégorie</span> <!-- Badge affichant la catégorie de la question (mis à jour par JS) -->
+      <span class="badge badge-moyen" id="q-diff-badge">⭐⭐ Moyen</span> <!-- Badge affichant la difficulté (classe et texte mis à jour par JS) -->
+    </div>
+
+    <!-- Carte question -->
+    <div class="card question-card"> <!-- Carte avec fond verre dépoli contenant la question -->
+      <p class="question-text" id="q-enonce">…</p> <!-- Texte de la question (rempli par JS) -->
+      <p class="question-pts" id="q-pts"></p> <!-- Points disponibles pour cette question (rempli par JS) -->
+    </div>
+
+    <!-- Réponses -->
+    <div class="answers-grid" id="answers-grid"></div> <!-- Grille des boutons de réponse (4 boutons injectés dynamiquement par JS) -->
+
+    <!-- Anecdote (après réponse) -->
+    <div class="anecdote" id="anecdote"> <!-- Zone d'anecdote cachée par défaut, affichée après la réponse -->
+      <span class="anecdote-title">💡 Le savais-tu ?</span> <!-- Titre de l'anecdote -->
+      <span id="anecdote-text"></span> <!-- Texte de l'anecdote culturelle (rempli par JS) -->
+    </div>
+
+    <!-- Bouton suivant -->
+    <button id="btn-next" class="btn-next"> <!-- Bouton pour passer à la question suivante (caché jusqu'à la réponse) -->
+      Question suivante → <!-- Texte modifié en "Voir mes résultats 🏆" pour la dernière question -->
+    </button>
+
+  </div><!-- #screen-quiz : fin de l'écran du quiz -->
+
+  <!-- ╔════════════════════════════════════════════════════════╗
+       ║  SCREEN : RÉSULTATS                                   ║
+       ╚════════════════════════════════════════════════════════╝ -->
+  <div id="screen-results" class="screen"> <!-- Écran des résultats affiché à la fin du quiz -->
+
+    <div class="result-hero"> <!-- Section héros des résultats avec emoji et message personnalisé -->
+      <span class="result-emoji" id="res-emoji">🏆</span> <!-- Grand emoji de résultat (déterminé par JS selon le score) -->
+      <h2 class="result-title" id="res-title">Bravo !</h2> <!-- Message personnalisé selon le score (rempli par JS) -->
+      <p class="result-sub"   id="res-sub">Voici tes résultats</p> <!-- Sous-titre avec le nombre de bonnes réponses (rempli par JS) -->
+    </div>
+
+    <!-- Roue score -->
+    <div class="score-wheel-wrap"> <!-- Conteneur de la roue de score circulaire -->
+      <div class="score-wheel"> <!-- Roue SVG avec arc animé représentant le pourcentage de réussite -->
+        <svg width="180" height="180" viewBox="0 0 180 180"> <!-- SVG de 180x180 pixels pour la roue de score -->
+          <defs> <!-- Définitions des éléments SVG réutilisables -->
+            <linearGradient id="arcGrad" x1="0%" y1="0%" x2="100%" y2="100%"> <!-- Dégradé linéaire diagonal pour l'arc de score -->
+              <stop offset="0%"   stop-color="#FF4500" /> <!-- Début du dégradé : rouge lave -->
+              <stop offset="100%" stop-color="#FFB347" /> <!-- Fin du dégradé : ambre -->
+            </linearGradient>
+          </defs>
+          <circle class="sw-bg"  cx="90" cy="90" r="75" /> <!-- Cercle de fond gris de la roue -->
+          <circle class="sw-arc" cx="90" cy="90" r="75" id="sw-arc" stroke="url(#arcGrad)" /> <!-- Arc animé utilisant le dégradé (stroke-dashoffset contrôlé par JS) -->
+        </svg>
+        <div class="sw-inner"> <!-- Contenu centré à l'intérieur de la roue -->
+          <span class="sw-pct"   id="sw-pct">0%</span> <!-- Pourcentage de réussite (animé par JS de 0 à la valeur finale) -->
+          <span class="sw-label">Réussite</span> <!-- Label statique sous le pourcentage -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="res-grid"> <!-- Grille de 3 cartes statistiques de la partie -->
+      <div class="res-cell"> <!-- Carte statistique : score total -->
+        <div class="rc-val" id="rc-score">0</div> <!-- Score total animé (de 0 à la valeur finale par JS) -->
+        <div class="rc-label">Points</div> <!-- Label de la statistique -->
+      </div>
+      <div class="res-cell"> <!-- Carte statistique : ratio bonnes réponses -->
+        <div class="rc-val" id="rc-bonnes">—</div> <!-- Ratio "X/Y" rempli par JS -->
+        <div class="rc-label">Bonnes rép.</div> <!-- Label de la statistique -->
+      </div>
+      <div class="res-cell"> <!-- Carte statistique : durée de la partie -->
+        <div class="rc-val" id="rc-time">—</div> <!-- Durée formatée "MM:SS" remplie par JS -->
+        <div class="rc-label">Durée</div> <!-- Label de la statistique -->
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="result-actions"> <!-- Rangée de boutons d'action de l'écran résultats -->
+      <button id="btn-replay" class="btn btn-primary"> <!-- Bouton pour rejouer (retourne à l'écran d'accueil) -->
+        🔄 Rejouer
+      </button>
+      <button id="btn-lb-result" class="btn btn-outline"> <!-- Bouton pour accéder au classement depuis les résultats -->
+        🏆 Classement
+      </button>
+    </div>
+
+  </div><!-- #screen-results : fin de l'écran des résultats -->
+
+  <!-- ╔════════════════════════════════════════════════════════╗
+       ║  SCREEN : CLASSEMENT                                  ║
+       ╚════════════════════════════════════════════════════════╝ -->
+  <div id="screen-leaderboard" class="screen"> <!-- Écran du classement des meilleurs joueurs -->
+
+    <div class="lb-header"> <!-- En-tête de l'écran classement -->
+      <h2 class="lb-title">🏆 Classement général</h2> <!-- Titre du classement -->
+      <p class="lb-sub">Les meilleurs experts de la Réunion</p> <!-- Sous-titre -->
+    </div>
+
+    <div class="lb-wrap"> <!-- Conteneur avec bords arrondis pour le tableau -->
+      <table class="lb-table"> <!-- Tableau HTML du classement -->
+        <thead> <!-- En-tête du tableau avec les noms de colonnes -->
+          <tr> <!-- Ligne d'en-tête -->
+            <th>#</th> <!-- Colonne rang/médaille -->
+            <th>Joueur</th> <!-- Colonne pseudo du joueur -->
+            <th>Score</th> <!-- Colonne score total -->
+            <th>Réussite</th> <!-- Colonne pourcentage de bonnes réponses -->
+            <th>Temps</th> <!-- Colonne durée de la partie -->
+          </tr>
+        </thead>
+        <tbody id="lb-body"> <!-- Corps du tableau rempli dynamiquement par JS depuis l'API -->
+          <tr><td colspan="5" class="lb-empty">Chargement…</td></tr> <!-- Contenu initial en attendant les données -->
+        </tbody>
+      </table>
+    </div>
+
+    <div style="text-align:center;"> <!-- Conteneur centré pour le bouton retour -->
+      <button id="btn-back" class="btn btn-outline">← Retour à l'accueil</button> <!-- Bouton pour retourner à l'écran d'accueil -->
+    </div>
+
+  </div><!-- #screen-leaderboard : fin de l'écran classement -->
+
+</div><!-- #app : fin du conteneur principal de l'application -->
+
+<script src="/js/app.js"></script> <!-- Chargement du script JavaScript principal (en fin de body pour que le DOM soit prêt) -->
+</body>
+</html>

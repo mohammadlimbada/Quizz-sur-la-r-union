@@ -1,0 +1,772 @@
+/* ═══════════════════════════════════════════════════════════════
+   Quiz Réunion — Style Principal
+   Thème : Volcanique Élégant — Fond sombre, accents lave & tropical
+   Polices : Syne (titres) + Outfit (corps)
+   ═══════════════════════════════════════════════════════════════ */
+
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
+/* ↑ Importe 3 polices Google Fonts : Syne (titres), Outfit (texte), JetBrains Mono (code/chiffres) */
+
+/* ── Variables ──────────────────────────────────────────────── */
+:root { /* Déclare les variables CSS globales réutilisables dans toute la feuille de style */
+  /* Palette */
+  --lava:        #FF4500; /* Couleur principale : rouge-orange lave (couleur signature du quiz) */
+  --lava-glow:   rgba(255,69,0,.35); /* Variante transparente de la lave pour les lueurs et ombres */
+  --ember:       #FF8C42; /* Orange braise : utilisé pour les accents et surlignages */
+  --amber:       #FFB347; /* Ambre : couleur secondaire chaude pour les stats et scores */
+  --gold:        #F7C948; /* Or : couleur du score et des éléments premium */
+
+  --bg-900:      #0D0D14; /* Fond le plus sombre (arrière-plan principal de la page) */
+  --bg-800:      #13131F; /* Fond sombre niveau 2 */
+  --bg-700:      #1A1A2E; /* Fond sombre niveau 3 (cartes, inputs) */
+  --bg-600:      #1F2040; /* Fond sombre niveau 4 (hover, éléments interactifs) */
+  --surface:     rgba(255,255,255,.04); /* Surface translucide légère pour les cartes glassmorphism */
+  --surface-hi:  rgba(255,255,255,.08); /* Surface translucide plus visible (hover, badges) */
+  --border:      rgba(255,255,255,.08); /* Bordure subtile pour délimiter les éléments */
+  --border-hi:   rgba(255,255,255,.18); /* Bordure plus visible pour les états focus/hover */
+
+  --ocean:       #00C9E0; /* Bleu océan : couleur des anecdotes et infos complémentaires */
+  --leaf:        #3DDC84; /* Vert feuille : couleur des bonnes réponses et succès */
+  --rose:        #FF6B9D; /* Rose : couleur décorative (non utilisée directement dans le JS) */
+
+  --text:        #F0ECE3; /* Couleur de texte principale (blanc cassé légèrement chaud) */
+  --text-muted:  rgba(240,236,227,.5); /* Texte atténué à 50% d'opacité (sous-titres, labels) */
+  --text-dim:    rgba(240,236,227,.3); /* Texte très atténué à 30% d'opacité (placeholders, métadonnées) */
+
+  /* Espacements */
+  --r:    16px; /* Rayon de bordure standard pour les éléments (boutons, inputs, cartes) */
+  --r-lg: 24px; /* Rayon de bordure large pour les grandes cartes */
+  --r-xl: 32px; /* Rayon de bordure extra-large pour les panneaux principaux */
+
+  /* Transitions */
+  --ease: cubic-bezier(.4,0,.2,1); /* Courbe d'accélération Material Design (fluidité optimale) */
+  --t:    .22s; /* Durée de transition courte pour les interactions rapides */
+  --t-lg: .4s; /* Durée de transition longue pour les animations plus amples */
+}
+
+/* ── Reset ──────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; } /* Reset CSS : supprime les marges/paddings par défaut et utilise le modèle border-box */
+html { scroll-behavior: smooth; font-size: 16px; } /* Active le défilement fluide et définit la taille de police de base à 16px */
+
+body {
+  font-family: 'Outfit', sans-serif; /* Police principale Outfit pour tout le texte courant */
+  background: var(--bg-900); /* Fond très sombre (#0D0D14) pour le thème volcanique nocturne */
+  color: var(--text); /* Couleur de texte blanche chaude pour la lisibilité */
+  min-height: 100vh; /* S'assure que le body occupe au moins toute la hauteur de la fenêtre */
+  overflow-x: hidden; /* Empêche le défilement horizontal (évite les barres de défilement indésirables) */
+  line-height: 1.6; /* Hauteur de ligne 160% pour une meilleure lisibilité du texte */
+}
+
+/* ── Fond ambiant ───────────────────────────────────────────── */
+body::before { /* Pseudo-élément pour créer un dégradé ambiant décoratif en arrière-plan */
+  content: ''; /* Contenu vide obligatoire pour les pseudo-éléments */
+  position: fixed; /* Fixé à la fenêtre pour rester visible même lors du défilement */
+  inset: 0; /* Raccourci pour top:0, right:0, bottom:0, left:0 (couvre tout l'écran) */
+  background:
+    radial-gradient(ellipse 70% 45% at 20% 0%,  rgba(255,69,0,.12) 0%, transparent 60%), /* Lueur rouge-orange en haut à gauche (effet volcan) */
+    radial-gradient(ellipse 60% 50% at 80% 100%, rgba(0,201,224,.07) 0%, transparent 55%); /* Lueur bleu océan en bas à droite (effet mer) */
+  pointer-events: none; /* Le pseudo-élément n'intercepte pas les clics souris */
+  z-index: 0; /* Placé derrière le contenu principal */
+}
+
+/* Grain texture subtil */
+body::after { /* Pseudo-élément pour ajouter une texture granuleuse subtile sur toute la page */
+  content: ''; /* Contenu vide obligatoire */
+  position: fixed; /* Fixé à la fenêtre */
+  inset: 0; /* Couvre tout l'écran */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  /* ↑ SVG inline encodé en base64 qui génère un bruit fractal (effet papier/grain photographique à 3% d'opacité) */
+  pointer-events: none; /* N'intercepte pas les clics */
+  z-index: 0; /* Placé derrière le contenu */
+}
+
+/* ── Particules ─────────────────────────────────────────────── */
+#canvas-bg { /* Styles du canvas HTML5 qui affiche l'animation de particules de lave */
+  position: fixed; /* Fixé à la fenêtre pour l'animation en arrière-plan */
+  inset: 0; /* Couvre tout l'écran */
+  z-index: 0; /* Derrière tout le contenu de la page */
+  pointer-events: none; /* N'intercepte pas les clics (les boutons restent cliquables) */
+}
+
+/* ── Layout principal ───────────────────────────────────────── */
+#app { /* Conteneur principal de l'application */
+  position: relative; /* Position relative pour être au-dessus des pseudo-éléments du body */
+  z-index: 1; /* Au-dessus du canvas et des fonds décoratifs (z-index 0) */
+  min-height: 100vh; /* Occupe au moins toute la hauteur de la fenêtre */
+  display: flex; /* Utilise Flexbox pour centrer le contenu */
+  flex-direction: column; /* Les écrans s'empilent verticalement */
+  align-items: center; /* Centre horizontalement tous les éléments enfants */
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   HEADER
+   ═══════════════════════════════════════════════════════════════ */
+.site-header { /* En-tête du site affiché en permanence en haut de la page */
+  width: 100%; /* Prend toute la largeur disponible */
+  max-width: 960px; /* Limite la largeur maximale pour les grands écrans */
+  padding: 28px 32px 0; /* Espacement intérieur : 28px en haut, 32px sur les côtés, 0 en bas */
+  display: flex; /* Flexbox pour aligner logo et pill */
+  align-items: center; /* Aligne verticalement au centre */
+  justify-content: space-between; /* Espace entre le logo (gauche) et la pill (droite) */
+}
+
+.logo { /* Conteneur du logo (emoji volcan + texte) */
+  display: flex; /* Aligne l'emoji et le texte en ligne */
+  align-items: center; /* Aligne verticalement au centre */
+  gap: 14px; /* Espace de 14px entre l'emoji et le bloc texte */
+  text-decoration: none; /* Retire le soulignement si le logo est un lien */
+  color: inherit; /* Hérite de la couleur du parent */
+}
+.logo-volcano { /* Emoji volcan du logo */
+  font-size: 2rem; /* Taille de 2rem (32px) */
+  animation: volcano-pulse 4s ease-in-out infinite; /* Animation de pulsation toutes les 4 secondes */
+  filter: drop-shadow(0 0 10px rgba(255,69,0,.6)); /* Lueur orange autour de l'emoji */
+}
+@keyframes volcano-pulse { /* Animation CSS qui fait pulser le volcan du logo */
+  0%,100% { filter: drop-shadow(0 0 10px rgba(255,69,0,.6)); transform: scale(1); } /* État de repos : lueur normale, taille normale */
+  50%      { filter: drop-shadow(0 0 22px rgba(255,140,66,.9)); transform: scale(1.05); } /* Pic de pulsation : lueur plus forte, légèrement agrandi */
+}
+.logo-title   { font-family: 'Syne', sans-serif; font-size: 1.15rem; font-weight: 800; letter-spacing: -.01em; } /* Titre du logo en police Syne, gras, légèrement resserré */
+.logo-tagline { font-size: .72rem; color: var(--text-muted); letter-spacing: .14em; text-transform: uppercase; margin-top: 1px; } /* Sous-titre du logo en petites capitales atténuées */
+
+.header-pill { /* Badge "BTS SIO · SLAM" dans le coin droit du header */
+  background: rgba(255,69,0,.12); /* Fond rouge-orange très transparent */
+  border: 1px solid rgba(255,69,0,.3); /* Bordure orange semi-transparente */
+  border-radius: 99px; /* Forme pill (pilule) très arrondie */
+  padding: 7px 16px; /* Espacement intérieur compact */
+  font-family: 'JetBrains Mono', monospace; /* Police monospace pour un look technique */
+  font-size: .75rem; /* Petite taille de police */
+  color: var(--ember); /* Couleur orange braise */
+  letter-spacing: .04em; /* Léger espacement entre les lettres */
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ÉCRANS (transition animée)
+   ═══════════════════════════════════════════════════════════════ */
+.screen { /* Classe commune à tous les écrans (home, loading, quiz, résultats, classement) */
+  display: none; /* Caché par défaut (seul l'écran actif est visible) */
+  width: 100%; /* Largeur complète */
+  max-width: 960px; /* Largeur maximale pour les grands écrans */
+  padding: 40px 32px 80px; /* Espacement intérieur : 40px en haut, 32px côtés, 80px en bas */
+}
+.screen.active { /* Classe ajoutée par JS à l'écran actuellement affiché */
+  display: block; /* Affiche l'écran */
+  animation: fadein .45s var(--ease) both; /* Animation d'apparition de 0,45 secondes */
+}
+@keyframes fadein { /* Animation d'entrée : l'écran monte depuis le bas et devient opaque */
+  from { opacity: 0; transform: translateY(24px); } /* Début : invisible et décalé de 24px vers le bas */
+  to   { opacity: 1; transform: translateY(0); } /* Fin : visible et à sa position normale */
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   COMPOSANTS RÉUTILISABLES
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Bouton primaire ────────────────────────────────────────── */
+.btn { /* Classe de base pour tous les boutons de l'application */
+  display: inline-flex; /* Flexbox inline pour aligner le texte et l'icône */
+  align-items: center; /* Aligne le contenu verticalement au centre */
+  gap: 10px; /* Espace entre le texte et l'icône */
+  border: none; /* Pas de bordure par défaut (overridden par les variantes) */
+  border-radius: 99px; /* Forme pilule pour tous les boutons */
+  font-family: 'Outfit', sans-serif; /* Police Outfit pour les boutons */
+  font-weight: 600; /* Texte semi-gras */
+  cursor: pointer; /* Curseur pointeur pour indiquer l'interactivité */
+  transition: transform var(--t) var(--ease), box-shadow var(--t) var(--ease), background var(--t); /* Transitions fluides pour transform, ombre et fond */
+  outline: none; /* Retire le contour natif du navigateur */
+  white-space: nowrap; /* Empêche le texte de se couper sur plusieurs lignes */
+}
+.btn-primary { /* Variante principale : dégradé lave */
+  background: linear-gradient(135deg, #FF4500, #FF8C42); /* Dégradé diagonal rouge-orange vers orange */
+  color: #fff; /* Texte blanc pour le contraste */
+  padding: 16px 40px; /* Espacement généreux pour un bouton principal */
+  font-size: 1rem; /* Taille de police normale */
+  box-shadow: 0 4px 24px rgba(255,69,0,.4); /* Ombre portée orange */
+  letter-spacing: .01em; /* Léger espacement entre les lettres */
+}
+.btn-primary:hover  { transform: translateY(-3px); box-shadow: 0 10px 36px rgba(255,69,0,.55); } /* Au survol : remonte de 3px et ombre plus intense */
+.btn-primary:active { transform: translateY(-1px); } /* Au clic : légère descente (effet pressé) */
+
+.btn-outline { /* Variante contour : fond transparent avec bordure */
+  background: transparent; /* Fond transparent */
+  border: 1.5px solid var(--border-hi); /* Bordure semi-transparente */
+  color: var(--text-muted); /* Texte atténué */
+  padding: 14px 32px; /* Espacement légèrement plus petit que le bouton primaire */
+  font-size: .92rem; /* Légèrement plus petit que le bouton primaire */
+}
+.btn-outline:hover { border-color: rgba(255,255,255,.4); color: var(--text); } /* Au survol : bordure et texte plus visibles */
+
+.btn-ghost { /* Variante fantôme : fond légèrement visible */
+  background: var(--surface-hi); /* Fond très légèrement visible */
+  border: 1px solid var(--border); /* Bordure subtile */
+  color: var(--text-muted); /* Texte atténué */
+  padding: 12px 28px; /* Espacement compact */
+  font-size: .88rem; /* Taille légèrement réduite */
+  border-radius: var(--r); /* Coins moins arrondis que les autres variantes */
+}
+.btn-ghost:hover { background: rgba(255,255,255,.1); color: var(--text); } /* Au survol : fond plus visible et texte plus clair */
+
+.btn .icon { font-size: 1.1rem; transition: transform var(--t) var(--ease); } /* Icône dans le bouton, légèrement agrandie */
+.btn:hover .icon { transform: translateX(4px); } /* Au survol du bouton : l'icône se décale vers la droite */
+
+/* ── Card ───────────────────────────────────────────────────── */
+.card { /* Composant carte avec effet glassmorphism */
+  background: var(--surface); /* Fond très légèrement blanc translucide */
+  border: 1px solid var(--border); /* Bordure subtile */
+  border-radius: var(--r-lg); /* Coins arrondis larges */
+  backdrop-filter: blur(12px); /* Flou de l'arrière-plan pour l'effet verre dépoli */
+}
+
+/* ── Badge ──────────────────────────────────────────────────── */
+.badge { /* Composant badge/étiquette pour afficher des informations contextuelles */
+  display: inline-flex; /* Flex pour aligner emoji et texte */
+  align-items: center; /* Alignement vertical */
+  gap: 6px; /* Espace entre l'emoji et le texte */
+  border-radius: 99px; /* Forme pilule */
+  padding: 5px 14px; /* Espacement compact */
+  font-size: .75rem; /* Petite taille de police */
+  font-weight: 600; /* Semi-gras */
+  letter-spacing: .06em; /* Espacement entre les lettres */
+  text-transform: uppercase; /* Texte en majuscules */
+}
+.badge-facile    { background: rgba(61,220,132,.15); color: var(--leaf);  border: 1px solid rgba(61,220,132,.35); } /* Badge vert pour les questions faciles */
+.badge-moyen     { background: rgba(255,179,71,.15); color: var(--amber); border: 1px solid rgba(255,179,71,.35); } /* Badge ambre pour les questions de niveau moyen */
+.badge-difficile { background: rgba(255,69,0,.2);    color: var(--ember); border: 1px solid rgba(255,69,0,.45); }  /* Badge rouge-orange pour les questions difficiles */
+.badge-cat       { background: var(--surface-hi); border: 1px solid var(--border-hi); color: var(--text-muted); } /* Badge neutre pour l'affichage de la catégorie */
+
+/* ── Divider ────────────────────────────────────────────────── */
+.divider { height: 1px; background: var(--border); margin: 28px 0; } /* Séparateur horizontal de 1px avec marges de 28px */
+
+/* ═══════════════════════════════════════════════════════════════
+   ÉCRAN HOME
+   ═══════════════════════════════════════════════════════════════ */
+.hero { /* Section héros de l'écran d'accueil (titre principal) */
+  text-align: center; /* Centre le texte */
+  padding: 48px 0 40px; /* 48px en haut, 40px en bas */
+}
+.hero-eyebrow { /* Bandeau informatif au-dessus du titre principal */
+  display: inline-flex; /* Flex pour l'emoji et le texte */
+  align-items: center; /* Alignement vertical */
+  gap: 8px; /* Espace entre les éléments */
+  background: rgba(61,220,132,.1); /* Fond vert très transparent */
+  border: 1px solid rgba(61,220,132,.3); /* Bordure verte semi-transparente */
+  border-radius: 99px; /* Forme pilule */
+  padding: 6px 18px; /* Espacement compact */
+  font-size: .78rem; /* Petite police */
+  font-weight: 600; /* Semi-gras */
+  letter-spacing: .12em; /* Espacement important entre les lettres */
+  text-transform: uppercase; /* Majuscules */
+  color: var(--leaf); /* Texte vert feuille */
+  margin-bottom: 28px; /* Espace sous le bandeau avant le titre */
+}
+.hero-title { /* Titre principal "Île de la Réunion" */
+  font-family: 'Syne', sans-serif; /* Police Syne pour les grands titres */
+  font-size: clamp(3rem, 7vw, 5.5rem); /* Taille fluide : min 3rem, idéalement 7vw, max 5,5rem */
+  font-weight: 800; /* Extra-gras */
+  line-height: .95; /* Interligne légèrement serré pour un titre compact */
+  letter-spacing: -.03em; /* Crénage négatif pour un effet moderne */
+  margin-bottom: 20px; /* Espace sous le titre */
+  background: linear-gradient(160deg, #fff 20%, var(--amber) 60%, var(--lava) 90%); /* Dégradé blanc → ambre → lave */
+  -webkit-background-clip: text; /* Clip le fond sur le texte (préfixe WebKit) */
+  -webkit-text-fill-color: transparent; /* Rend le remplissage du texte transparent (préfixe WebKit) */
+  background-clip: text; /* Clip le fond sur le texte (standard) */
+}
+.hero-sub { /* Sous-titre descriptif sous le titre principal */
+  font-size: 1.1rem; /* Légèrement plus grand que la police de base */
+  color: var(--text-muted); /* Texte atténué à 50% */
+  max-width: 480px; /* Largeur maximale pour une bonne lisibilité */
+  margin: 0 auto 48px; /* Centré avec 48px d'espace en bas */
+  font-weight: 300; /* Poids léger pour le contraste avec le titre */
+  line-height: 1.75; /* Interligne généreux pour la lisibilité */
+}
+
+/* ── Stats rapides ──────────────────────────────────────────── */
+.stats-row { /* Rangée de 3 statistiques (parties, moyenne, record) */
+  display: flex; /* Flex pour aligner les cellules horizontalement */
+  justify-content: center; /* Centre la rangée */
+  gap: 0; /* Pas d'espace entre les cellules (bordures gèrent la séparation) */
+  margin-bottom: 52px; /* Espace sous les stats */
+  border: 1px solid var(--border); /* Bordure extérieure du groupe */
+  border-radius: var(--r-lg); /* Coins arrondis */
+  overflow: hidden; /* Cache les débordements (pour les bordures arrrondies des cellules) */
+  max-width: 520px; /* Largeur maximale */
+  margin-left: auto; /* Centre horizontalement */
+  margin-right: auto; /* Centre horizontalement */
+}
+.stat-cell { /* Cellule individuelle de statistique */
+  flex: 1; /* Prend une part égale de l'espace disponible */
+  padding: 20px 24px; /* Espacement intérieur */
+  text-align: center; /* Centre le contenu */
+  border-right: 1px solid var(--border); /* Séparateur vertical entre les cellules */
+  background: var(--surface); /* Fond légèrement visible */
+}
+.stat-cell:last-child { border-right: none; } /* Retire la bordure droite de la dernière cellule */
+.stat-val   { font-family: 'Syne', sans-serif; font-size: 1.9rem; font-weight: 700; color: var(--ember); } /* Grande valeur numérique en orange */
+.stat-label { font-size: .72rem; color: var(--text-dim); letter-spacing: .1em; text-transform: uppercase; margin-top: 4px; } /* Petit label en majuscules sous la valeur */
+
+/* ── Panneau config ─────────────────────────────────────────── */
+.config-box { /* Panneau de configuration du quiz (pseudo, catégorie, nombre de questions) */
+  padding: 36px; /* Espacement intérieur généreux */
+  margin-bottom: 28px; /* Espace sous le panneau */
+  border-radius: var(--r-xl); /* Coins très arrondis */
+}
+.config-section { margin-bottom: 30px; } /* Section de configuration avec espace en bas */
+.config-section:last-child { margin-bottom: 0; } /* Retire l'espace pour la dernière section */
+.config-label { /* Label de section (type commentaire de code) */
+  font-family: 'JetBrains Mono', monospace; /* Police monospace pour un look terminal */
+  font-size: .72rem; /* Petite taille */
+  letter-spacing: .16em; /* Espacement important entre les lettres */
+  text-transform: uppercase; /* Majuscules */
+  color: var(--text-dim); /* Très atténué */
+  margin-bottom: 14px; /* Espace entre le label et l'élément de configuration */
+  display: block; /* Occupe toute la largeur disponible */
+}
+
+/* Input pseudo */
+.input-pseudo { /* Champ de saisie du pseudo du joueur */
+  width: 100%; /* Prend toute la largeur du conteneur */
+  background: var(--bg-700); /* Fond sombre */
+  border: 1.5px solid var(--border); /* Bordure subtile */
+  border-radius: var(--r); /* Coins arrondis */
+  padding: 15px 20px; /* Espacement intérieur généreux */
+  color: var(--text); /* Texte blanc cassé */
+  font-family: 'Outfit', sans-serif; /* Police Outfit */
+  font-size: 1rem; /* Taille de police normale */
+  font-weight: 500; /* Semi-gras */
+  outline: none; /* Retire le contour natif du navigateur */
+  transition: border-color var(--t) var(--ease), box-shadow var(--t) var(--ease); /* Transition pour le focus */
+}
+.input-pseudo:focus { /* État focus du champ pseudo */
+  border-color: var(--ember); /* Bordure orange au focus */
+  box-shadow: 0 0 0 3px rgba(255,140,66,.18); /* Halo orange autour du champ */
+}
+.input-pseudo::placeholder { color: var(--text-dim); font-weight: 300; } /* Texte indicatif très atténué et léger */
+
+/* Grille catégories */
+.cat-grid { /* Grille responsive des tuiles de catégorie */
+  display: grid; /* Grille CSS */
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); /* Colonnes automatiques de minimum 130px */
+  gap: 10px; /* Espace de 10px entre les tuiles */
+}
+.cat-tile { /* Tuile individuelle de catégorie cliquable */
+  background: var(--bg-700); /* Fond sombre */
+  border: 1.5px solid var(--border); /* Bordure subtile */
+  border-radius: var(--r); /* Coins arrondis */
+  padding: 18px 12px 14px; /* Espacement intérieur */
+  cursor: pointer; /* Curseur pointeur */
+  text-align: center; /* Centre le contenu */
+  transition: border-color var(--t) var(--ease), transform var(--t) var(--ease), box-shadow var(--t) var(--ease); /* Transitions pour l'interactivité */
+  position: relative; /* Nécessaire pour le pseudo-élément ::after */
+  overflow: hidden; /* Cache le débordement du pseudo-élément */
+}
+.cat-tile::after { /* Pseudo-élément pour l'effet de survol */
+  content: ''; /* Contenu vide obligatoire */
+  position: absolute; /* Positionné par rapport à la tuile */
+  inset: 0; /* Couvre toute la tuile */
+  background: currentColor; /* Utilise la couleur du texte courant */
+  opacity: 0; /* Invisible par défaut */
+  transition: opacity var(--t); /* Transition pour l'opacité */
+}
+.cat-tile:hover { transform: translateY(-2px); border-color: var(--border-hi); } /* Au survol : remonte légèrement et bordure plus visible */
+.cat-tile.selected { border-color: var(--ember); box-shadow: 0 0 0 3px rgba(255,140,66,.15); } /* Tuile sélectionnée : bordure orange et halo */
+.cat-tile.selected::after { opacity: .06; color: var(--ember); } /* Léger fond orange sur la tuile sélectionnée */
+.cat-tile .t-emoji { font-size: 1.7rem; display: block; margin-bottom: 8px; } /* Emoji de la catégorie, affiché comme bloc */
+.cat-tile .t-nom   { font-size: .78rem; font-weight: 600; color: var(--text-muted); line-height: 1.3; } /* Nom de la catégorie */
+.cat-tile .t-count { font-family: 'JetBrains Mono', monospace; font-size: .68rem; color: var(--text-dim); margin-top: 5px; } /* Nombre de questions en police monospace */
+.cat-tile.selected .t-nom { color: var(--text); } /* Nom plus visible quand la tuile est sélectionnée */
+
+/* Sélecteur nombre de questions */
+.nb-row { display: flex; gap: 8px; flex-wrap: wrap; } /* Rangée de chips de sélection du nombre de questions */
+.nb-chip { /* Bouton chip pour sélectionner le nombre de questions */
+  background: var(--bg-700); /* Fond sombre */
+  border: 1.5px solid var(--border); /* Bordure subtile */
+  border-radius: var(--r); /* Coins arrondis */
+  padding: 10px 22px; /* Espacement compact */
+  font-family: 'JetBrains Mono', monospace; /* Police monospace pour les chiffres */
+  font-size: .88rem; /* Légèrement réduit */
+  color: var(--text-muted); /* Texte atténué */
+  cursor: pointer; /* Curseur pointeur */
+  transition: all var(--t) var(--ease); /* Transition sur toutes les propriétés */
+}
+.nb-chip:hover  { border-color: var(--border-hi); color: var(--text); } /* Au survol : bordure et texte plus visibles */
+.nb-chip.active { background: rgba(255,140,66,.15); border-color: var(--ember); color: var(--ember); } /* Chip actif : fond et texte orange */
+
+/* Actions home */
+.home-actions { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; } /* Rangée de boutons d'action centrés (Démarrer + Classement) */
+
+/* ═══════════════════════════════════════════════════════════════
+   ÉCRAN LOADING
+   ═══════════════════════════════════════════════════════════════ */
+.loading-center { /* Conteneur centré pour l'écran de chargement */
+  display: flex; /* Flex pour centrer le contenu */
+  flex-direction: column; /* Empilage vertical (loader + texte) */
+  align-items: center; /* Centre horizontalement */
+  justify-content: center; /* Centre verticalement */
+  padding: 100px 0; /* Grand espacement pour centrer visuellement */
+  gap: 20px; /* Espace entre le loader et le texte */
+  color: var(--text-muted); /* Texte atténué */
+}
+.ring-loader { /* Loader animé circulaire */
+  width: 48px; height: 48px; /* Taille 48x48 pixels */
+  border: 3px solid var(--border); /* Cercle de fond avec bordure */
+  border-top-color: var(--ember); /* Segment orange en haut (la partie visible qui tourne) */
+  border-radius: 50%; /* Forme parfaitement circulaire */
+  animation: spin .75s linear infinite; /* Rotation continue de 0,75s */
+}
+@keyframes spin { to { transform: rotate(360deg); } } /* Animation de rotation complète (360°) */
+
+/* ═══════════════════════════════════════════════════════════════
+   ÉCRAN QUIZ
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Header quiz */
+.quiz-topbar { /* Barre supérieure du quiz (numéro question + score + timer) */
+  display: flex; /* Flex pour aligner les éléments horizontalement */
+  align-items: center; /* Alignement vertical */
+  justify-content: space-between; /* Espace entre les éléments */
+  margin-bottom: 24px; /* Espace sous la topbar */
+  gap: 16px; /* Espace entre les éléments */
+  flex-wrap: wrap; /* Passage à la ligne si nécessaire (responsive) */
+}
+.qnb { /* Indicateur "Question X / Y" */
+  font-family: 'JetBrains Mono', monospace; /* Police monospace pour les chiffres */
+  font-size: .88rem; /* Légèrement réduit */
+  color: var(--text-muted); /* Texte atténué */
+}
+.qnb strong { color: var(--text); } /* Les chiffres sont en blanc plein (X et Y) */
+
+.score-chip { /* Affichage du score en temps réel */
+  display: flex; /* Flex pour l'éclair et le score */
+  align-items: center; /* Alignement vertical */
+  gap: 8px; /* Espace entre l'icône et le score */
+  background: rgba(247,201,72,.1); /* Fond doré très transparent */
+  border: 1px solid rgba(247,201,72,.3); /* Bordure dorée semi-transparente */
+  border-radius: 99px; /* Forme pilule */
+  padding: 8px 18px; /* Espacement compact */
+  font-family: 'JetBrains Mono', monospace; /* Police monospace pour les chiffres */
+  font-size: .88rem; /* Légèrement réduit */
+  color: var(--gold); /* Texte doré */
+}
+
+/* Timer anneau */
+.timer-wrap { /* Conteneur du minuteur SVG circulaire */
+  position: relative; /* Nécessaire pour superposer le SVG et le chiffre */
+  width: 52px; height: 52px; /* Dimensions du timer */
+  flex-shrink: 0; /* Empêche le timer de se réduire dans le flex */
+}
+.timer-wrap svg { position: absolute; top: 0; left: 0; transform: rotate(-90deg); } /* SVG positionné et tourné de -90° pour que l'arc commence en haut */
+.timer-bg  { stroke: var(--border);  fill: none; stroke-width: 4; } /* Cercle de fond du timer (gris) */
+.timer-arc { stroke: var(--ember);   fill: none; stroke-width: 4; stroke-linecap: round; /* Arc orange qui diminue avec le temps */
+             stroke-dasharray: 138; stroke-dashoffset: 0; transition: stroke-dashoffset 1s linear, stroke .4s; }
+             /* stroke-dasharray: 138 = circonférence (2×π×22) ; stroke-dashoffset contrôle la longueur visible ; transition linéaire de 1s */
+.timer-num { /* Chiffre affiché au centre du timer */
+  position: absolute; /* Superposé au SVG */
+  inset: 0; /* Couvre tout le conteneur */
+  display: flex; /* Flex pour centrer le chiffre */
+  align-items: center; /* Centrage vertical */
+  justify-content: center; /* Centrage horizontal */
+  font-family: 'JetBrains Mono', monospace; /* Police monospace */
+  font-size: .82rem; /* Petite taille */
+  font-weight: 600; /* Semi-gras */
+}
+
+/* Barre de progression */
+.progress-bar { /* Conteneur de la barre de progression du quiz */
+  height: 4px; /* Barre fine de 4px */
+  background: var(--border); /* Fond gris */
+  border-radius: 99px; /* Bords arrondis */
+  overflow: hidden; /* Cache le débordement de la barre de remplissage */
+  margin-bottom: 30px; /* Espace sous la barre */
+}
+.progress-bar-fill { /* Remplissage de la barre de progression */
+  height: 100%; /* Prend toute la hauteur du conteneur */
+  border-radius: 99px; /* Bords arrondis */
+  background: linear-gradient(90deg, var(--lava), var(--amber)); /* Dégradé gauche-droite lave → ambre */
+  transition: width .5s var(--ease); /* Transition fluide de la largeur */
+}
+
+/* Question meta */
+.q-meta { /* Zone de méta-informations de la question (badge catégorie + badge difficulté) */
+  display: flex; /* Flex pour aligner les badges */
+  align-items: center; /* Alignement vertical */
+  gap: 10px; /* Espace entre les badges */
+  flex-wrap: wrap; /* Passage à la ligne si nécessaire */
+  margin-bottom: 20px; /* Espace sous les méta */
+}
+
+/* Carte question */
+.question-card { /* Carte contenant l'énoncé de la question */
+  padding: 36px; /* Espacement intérieur généreux */
+  margin-bottom: 22px; /* Espace sous la carte */
+  border-radius: var(--r-xl); /* Coins très arrondis */
+  animation: card-appear .3s var(--ease) both; /* Animation d'apparition */
+}
+@keyframes card-appear { /* Animation d'apparition de la carte question */
+  from { opacity: 0; transform: scale(.97); } /* Commence invisible et légèrement réduit */
+  to   { opacity: 1; transform: scale(1); } /* Se termine à taille normale */
+}
+.question-text { /* Texte de l'énoncé de la question */
+  font-family: 'Syne', sans-serif; /* Police Syne pour les questions */
+  font-size: clamp(1.2rem, 2.8vw, 1.65rem); /* Taille fluide : min 1,2rem, idéalement 2,8vw, max 1,65rem */
+  font-weight: 700; /* Gras */
+  line-height: 1.35; /* Interligne */
+  letter-spacing: -.01em; /* Légèrement resserré */
+}
+.question-pts { /* Texte affichant les points disponibles */
+  margin-top: 14px; /* Espace au-dessus */
+  font-family: 'JetBrains Mono', monospace; /* Police monospace */
+  font-size: .75rem; /* Petite taille */
+  color: var(--text-dim); /* Très atténué */
+}
+
+/* Grille réponses */
+.answers-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; } /* Grille 2 colonnes pour les 4 boutons de réponse */
+@media (max-width: 580px) { .answers-grid { grid-template-columns: 1fr; } } /* Sur mobile (<580px) : 1 seule colonne (4 boutons empilés) */
+
+.answer-btn { /* Bouton de réponse cliquable */
+  display: flex; /* Flex pour aligner lettre et texte */
+  align-items: center; /* Alignement vertical */
+  gap: 14px; /* Espace entre la lettre et le texte */
+  background: var(--bg-700); /* Fond sombre */
+  border: 1.5px solid var(--border); /* Bordure subtile */
+  border-radius: var(--r); /* Coins arrondis */
+  padding: 16px 20px; /* Espacement généreux */
+  text-align: left; /* Texte aligné à gauche */
+  cursor: pointer; /* Curseur pointeur */
+  color: var(--text); /* Texte blanc cassé */
+  font-family: 'Outfit', sans-serif; /* Police Outfit */
+  font-size: .95rem; /* Légèrement réduit */
+  font-weight: 500; /* Semi-gras */
+  line-height: 1.4; /* Interligne */
+  transition: all var(--t) var(--ease); /* Transition sur toutes les propriétés */
+}
+.answer-btn:hover:not(:disabled) { /* Au survol d'un bouton non désactivé */
+  border-color: var(--border-hi); /* Bordure plus visible */
+  background: var(--bg-600); /* Fond légèrement plus clair */
+  transform: translateX(5px); /* Décale vers la droite (effet de sélection) */
+}
+.answer-letter { /* Badge circulaire avec la lettre A/B/C/D */
+  flex-shrink: 0; /* Ne rétrécit pas */
+  width: 32px; height: 32px; /* Dimensions du cercle */
+  border-radius: 50%; /* Forme parfaitement circulaire */
+  background: var(--surface-hi); /* Fond légèrement visible */
+  border: 1.5px solid var(--border); /* Bordure subtile */
+  display: flex; /* Flex pour centrer la lettre */
+  align-items: center; /* Centrage vertical */
+  justify-content: center; /* Centrage horizontal */
+  font-family: 'JetBrains Mono', monospace; /* Police monospace */
+  font-size: .75rem; /* Petite taille */
+  font-weight: 600; /* Semi-gras */
+  transition: all var(--t) var(--ease); /* Transition pour les états correct/wrong */
+}
+
+/* States réponse */
+.answer-btn.correct { /* État correct : la bonne réponse a été donnée */
+  background: rgba(61,220,132,.12); /* Fond vert transparent */
+  border-color: var(--leaf); /* Bordure verte */
+  animation: correct-pop .5s var(--ease); /* Animation de "pop" de succès */
+}
+.answer-btn.correct .answer-letter { background: var(--leaf); border-color: var(--leaf); color: #0a1a0e; } /* Lettre sur fond vert plein */
+
+.answer-btn.wrong { /* État incorrect : mauvaise réponse cliquée */
+  background: rgba(255,69,0,.12); /* Fond rouge transparent */
+  border-color: var(--lava); /* Bordure rouge */
+  animation: wrong-shake .4s var(--ease); /* Animation de secousse (indication d'erreur) */
+}
+.answer-btn.wrong .answer-letter { background: var(--lava); border-color: var(--lava); color: #fff; } /* Lettre sur fond rouge plein */
+
+.answer-btn.dimmed { opacity: .4; } /* Réponse estompée (mauvaises réponses non cliquées après une erreur) */
+.answer-btn:disabled { cursor: default; } /* Curseur normal pour les boutons désactivés */
+
+@keyframes correct-pop { /* Animation de succès : flash de lumière verte */
+  0%,100% { box-shadow: none; } /* Début et fin sans ombre */
+  50%     { box-shadow: 0 0 30px rgba(61,220,132,.5); } /* Pic : halo vert */
+}
+@keyframes wrong-shake { /* Animation d'erreur : secousse horizontale */
+  0%,100% { transform: translateX(0); } /* Début et fin en position normale */
+  20%,60% { transform: translateX(-7px); } /* Décalage vers la gauche */
+  40%,80% { transform: translateX(7px); } /* Décalage vers la droite */
+}
+
+/* Anecdote */
+.anecdote { /* Zone d'anecdote affichée après chaque réponse */
+  background: rgba(0,201,224,.07); /* Fond bleu océan très transparent */
+  border: 1px solid rgba(0,201,224,.25); /* Bordure bleue semi-transparente */
+  border-radius: var(--r); /* Coins arrondis */
+  padding: 20px 24px; /* Espacement intérieur */
+  margin-top: 18px; /* Espace au-dessus */
+  font-size: .9rem; /* Légèrement réduit */
+  color: #d6f6fb; /* Bleu clair pour le texte de l'anecdote */
+  line-height: 1.7; /* Interligne généreux */
+  display: none; /* Caché par défaut */
+}
+.anecdote.show { display: block; animation: fadein .3s var(--ease); } /* Affiché avec animation quand la classe 'show' est ajoutée */
+.anecdote-title { /* Titre "💡 Le savais-tu ?" de l'anecdote */
+  font-family: 'JetBrains Mono', monospace; /* Police monospace */
+  font-size: .7rem; /* Très petite taille */
+  letter-spacing: .14em; /* Espacement important */
+  text-transform: uppercase; /* Majuscules */
+  color: var(--ocean); /* Couleur bleue océan */
+  display: block; /* Occupe toute la largeur */
+  margin-bottom: 8px; /* Espace sous le titre */
+}
+
+/* Bouton suivant */
+.btn-next { /* Bouton "Question suivante" ou "Voir mes résultats" */
+  display: none; /* Caché par défaut (affiché après une réponse) */
+  margin: 22px auto 0; /* Centré avec espace en haut */
+  background: var(--bg-600); /* Fond sombre */
+  border: 1.5px solid var(--border-hi); /* Bordure visible */
+  border-radius: 99px; /* Forme pilule */
+  padding: 14px 36px; /* Espacement généreux */
+  font-family: 'Outfit', sans-serif; /* Police Outfit */
+  font-size: .95rem; /* Légèrement réduit */
+  font-weight: 600; /* Semi-gras */
+  color: var(--text); /* Texte blanc */
+  cursor: pointer; /* Curseur pointeur */
+  transition: all var(--t) var(--ease); /* Transition sur toutes les propriétés */
+  letter-spacing: .01em; /* Léger espacement */
+}
+.btn-next.show { display: block; animation: fadein .3s var(--ease); } /* Affiché avec animation quand la classe 'show' est ajoutée */
+.btn-next:hover { border-color: var(--ember); color: var(--ember); transform: translateX(4px); } /* Au survol : couleur orange et décalage vers la droite */
+
+/* ═══════════════════════════════════════════════════════════════
+   ÉCRAN RÉSULTATS
+   ═══════════════════════════════════════════════════════════════ */
+.result-hero { text-align: center; padding: 36px 0 40px; } /* Section héros des résultats (emoji + titre + sous-titre) */
+.result-emoji { /* Grand emoji de résultat (🏆, 🌋, 🌺...) */
+  font-size: 4.5rem; /* Très grande taille */
+  display: block; /* Bloc pour centrer avec text-align */
+  margin-bottom: 20px; /* Espace sous l'emoji */
+  animation: emoji-bounce .8s var(--ease) .2s both; /* Animation de rebond avec délai de 0,2s */
+  filter: drop-shadow(0 0 20px rgba(255,179,71,.5)); /* Lueur ambrée */
+}
+@keyframes emoji-bounce { /* Animation de rebond de l'emoji de résultat */
+  0%  { transform: scale(0) rotate(-20deg); opacity: 0; } /* Commence invisible, petit et incliné */
+  60% { transform: scale(1.2) rotate(4deg); } /* Dépasse légèrement la taille finale (effet rebond) */
+  100%{ transform: scale(1) rotate(0); opacity: 1; } /* Se stabilise à taille normale */
+}
+.result-title { /* Titre du message de résultat personnalisé */
+  font-family: 'Syne', sans-serif; /* Police Syne */
+  font-size: clamp(1.8rem, 4vw, 2.8rem); /* Taille fluide */
+  font-weight: 800; /* Extra-gras */
+  letter-spacing: -.02em; /* Crénage négatif */
+  background: linear-gradient(135deg, #fff, var(--amber)); /* Dégradé blanc vers ambre */
+  -webkit-background-clip: text; /* Clip du fond sur le texte (WebKit) */
+  -webkit-text-fill-color: transparent; /* Remplissage transparent (WebKit) */
+  background-clip: text; /* Clip du fond sur le texte */
+  margin-bottom: 8px; /* Espace sous le titre */
+}
+.result-sub { font-size: 1rem; color: var(--text-muted); } /* Sous-titre des résultats (nb bonnes réponses) */
+
+/* Score radial */
+.score-wheel-wrap { display: flex; justify-content: center; margin: 32px 0; } /* Conteneur de la roue de score centrée */
+.score-wheel { position: relative; width: 180px; height: 180px; } /* Roue SVG circulaire de 180x180px */
+.score-wheel svg { transform: rotate(-90deg); } /* SVG tourné pour que l'arc commence en haut */
+.sw-bg  { fill: none; stroke: var(--bg-600); stroke-width: 12; } /* Cercle de fond de la roue (gris sombre) */
+.sw-arc { fill: none; stroke-width: 12; stroke-linecap: round; /* Arc de score avec extrémités arrondies */
+          stroke-dasharray: 471; stroke-dashoffset: 471; /* stroke-dasharray 471 = 2×π×75 (circonférence) ; offset 471 = vide au départ */
+          transition: stroke-dashoffset 1.4s cubic-bezier(.4,0,.2,1) .4s; } /* Animation de 1,4s avec délai de 0,4s */
+.sw-inner { /* Contenu centré à l'intérieur de la roue (pourcentage + label) */
+  position: absolute; inset: 0; /* Couvre tout le conteneur */
+  display: flex; flex-direction: column; align-items: center; justify-content: center; /* Centre verticalement et horizontalement */
+}
+.sw-pct   { font-family: 'Syne', sans-serif; font-size: 2.6rem; font-weight: 800; color: var(--text); } /* Grand pourcentage au centre de la roue */
+.sw-label { font-family: 'JetBrains Mono', monospace; font-size: .68rem; letter-spacing: .12em; text-transform: uppercase; color: var(--text-dim); } /* Label "Réussite" sous le pourcentage */
+
+/* Grid résultats */
+.res-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; margin-bottom: 32px; } /* Grille 3 colonnes pour les cartes de stats (score, bonnes réponses, temps) */
+@media (max-width: 480px) { .res-grid { grid-template-columns: 1fr 1fr; } } /* Sur très petit écran : 2 colonnes */
+.res-cell { /* Cellule individuelle de statistique de résultat */
+  background: var(--surface); /* Fond translucide */
+  border: 1px solid var(--border); /* Bordure subtile */
+  border-radius: var(--r); /* Coins arrondis */
+  padding: 22px 16px; /* Espacement intérieur */
+  text-align: center; /* Centre le contenu */
+}
+.rc-val   { font-family: 'Syne', sans-serif; font-size: 1.7rem; font-weight: 700; color: var(--text); } /* Valeur numérique de la statistique */
+.rc-label { font-size: .75rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: .09em; margin-top: 5px; } /* Label de la statistique */
+
+/* Actions résultats */
+.result-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; } /* Rangée de boutons d'action centrés sur l'écran résultats */
+
+/* ═══════════════════════════════════════════════════════════════
+   ÉCRAN CLASSEMENT
+   ═══════════════════════════════════════════════════════════════ */
+.lb-header { text-align: center; margin-bottom: 36px; } /* En-tête de l'écran classement */
+.lb-title { font-family: 'Syne', sans-serif; font-size: 2.2rem; font-weight: 800; letter-spacing: -.02em; } /* Titre "Classement général" */
+.lb-sub   { color: var(--text-muted); margin-top: 6px; } /* Sous-titre du classement */
+
+.lb-wrap { /* Conteneur du tableau de classement */
+  border: 1px solid var(--border); /* Bordure extérieure */
+  border-radius: var(--r-xl); /* Coins très arrondis */
+  overflow: hidden; /* Cache les débordements (coins arrondis du tableau) */
+  margin-bottom: 36px; /* Espace sous le tableau */
+}
+.lb-table { width: 100%; border-collapse: collapse; } /* Tableau pleine largeur sans doubles bordures */
+.lb-table thead { background: var(--bg-700); } /* En-tête du tableau sur fond sombre */
+.lb-table th { /* Cellules d'en-tête du tableau */
+  font-family: 'JetBrains Mono', monospace; /* Police monospace */
+  font-size: .7rem; /* Très petite taille */
+  letter-spacing: .14em; /* Espacement important */
+  text-transform: uppercase; /* Majuscules */
+  color: var(--text-dim); /* Très atténué */
+  padding: 14px 18px; /* Espacement intérieur */
+  text-align: left; /* Alignement à gauche */
+}
+.lb-table tbody tr { /* Ligne du tableau */
+  border-top: 1px solid var(--border); /* Séparateur entre les lignes */
+  transition: background var(--t); /* Transition pour le survol */
+}
+.lb-table tbody tr:hover { background: var(--surface); } /* Au survol : fond légèrement visible */
+.lb-table td { padding: 15px 18px; font-size: .9rem; } /* Cellules de données avec espacement */
+.lb-rank     { font-family: 'JetBrains Mono', monospace; font-weight: 600; font-size: 1rem; } /* Numéro de rang en monospace */
+.rank-gold   { color: var(--gold); } /* Couleur or pour la 1ère place */
+.rank-silver { color: #C8D6E0; } /* Couleur argent pour la 2ème place */
+.rank-bronze { color: #CD7F32; } /* Couleur bronze pour la 3ème place */
+.lb-pseudo   { font-weight: 600; } /* Pseudo du joueur en semi-gras */
+.lb-score    { font-family: 'JetBrains Mono', monospace; color: var(--amber); font-weight: 700; } /* Score en monospace ambre et gras */
+.lb-pct      { font-family: 'JetBrains Mono', monospace; } /* Pourcentage en monospace */
+.lb-time     { color: var(--text-muted); font-size: .82rem; } /* Temps en texte atténué et légèrement réduit */
+.lb-empty    { text-align: center; padding: 48px; color: var(--text-dim); } /* Cellule vide/message "Aucun score" */
+
+/* ── Toasts ─────────────────────────────────────────────────── */
+#toasts { /* Conteneur des notifications toast */
+  position: fixed; /* Fixé dans le coin de l'écran */
+  top: 24px; right: 24px; /* Positionné en haut à droite */
+  z-index: 9999; /* Au-dessus de tout le contenu */
+  display: flex; /* Flex pour empiler les toasts */
+  flex-direction: column; /* Empilage vertical */
+  gap: 10px; /* Espace entre les toasts */
+  pointer-events: none; /* Le conteneur ne bloque pas les clics */
+}
+.toast { /* Notification toast individuelle */
+  background: var(--bg-700); /* Fond sombre */
+  border: 1px solid var(--border); /* Bordure subtile */
+  border-radius: var(--r); /* Coins arrondis */
+  padding: 13px 18px; /* Espacement compact */
+  font-size: .87rem; /* Légèrement réduit */
+  max-width: 280px; /* Largeur maximale pour la lisibilité */
+  box-shadow: 0 8px 32px rgba(0,0,0,.5); /* Ombre portée importante pour la profondeur */
+  animation: toast-in .3s var(--ease) both; /* Animation d'entrée depuis la droite */
+  pointer-events: auto; /* Le toast lui-même intercepte les clics */
+}
+@keyframes toast-in { from { opacity: 0; transform: translateX(20px); } } /* Animation d'entrée : glisse depuis la droite */
+.toast.success { border-left: 3px solid var(--leaf); } /* Barre verte à gauche pour les succès */
+.toast.error   { border-left: 3px solid var(--lava); } /* Barre rouge à gauche pour les erreurs */
+.toast.info    { border-left: 3px solid var(--ocean); } /* Barre bleue à gauche pour les infos */
+.toast.warning { border-left: 3px solid var(--amber); } /* Barre ambre à gauche pour les avertissements */
+
+/* ── Scrollbar ──────────────────────────────────────────────── */
+::-webkit-scrollbar       { width: 5px; } /* Largeur de la scrollbar personnalisée : 5px (fine et discrète) */
+::-webkit-scrollbar-track { background: transparent; } /* Piste de la scrollbar transparente */
+::-webkit-scrollbar-thumb { background: rgba(255,69,0,.35); border-radius: 99px; } /* Poignée orange semi-transparente et arrondie */
+
+/* ── Responsive ─────────────────────────────────────────────── */
+@media (max-width: 640px) { /* Styles adaptés pour les petits écrans mobiles (<640px) */
+  .screen { padding: 24px 18px 60px; } /* Réduction des paddings sur mobile */
+  .site-header { padding: 20px 18px 0; } /* Réduction du padding du header sur mobile */
+  .config-box { padding: 24px 18px; } /* Réduction du padding du panneau config sur mobile */
+  .question-card { padding: 24px 18px; } /* Réduction du padding de la carte question sur mobile */
+  .hero-title { font-size: clamp(2.4rem, 10vw, 4rem); } /* Titre plus petit sur mobile */
+}
