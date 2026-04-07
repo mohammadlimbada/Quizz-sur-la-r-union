@@ -6,14 +6,14 @@ services:
     startCommand: node server.js
     envVars:
       - key: DB_HOST
-        value: maglev.proxy.rlwy.net
+        sync: false
       - key: DB_PORT
-        value: "23305"
+        sync: false
       - key: DB_USER
-        value: root
+        sync: false
       - key: DB_PASSWORD
-        value: jrQOHsitvTuASiWlCFnyptQfLNsbUULw
+        sync: false
       - key: DB_NAME
-        value: railway
+        sync: false
       - key: NODE_ENV
         value: production
