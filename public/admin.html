@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin — Quiz Réunion</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔧</text></svg>" />
+  <link rel="stylesheet" href="/css/style.css" />
+  <style>
+    /* ── Layout admin ── */
+    .admin-wrap { max-width: 1100px; margin: 0 auto; padding: 30px 24px 80px; }
+    .admin-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 32px; padding-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+    }
+    .admin-title { font-family: 'Syne', sans-serif; font-size: 1.5rem; font-weight: 700; }
+    .admin-badge {
+      background: rgba(255,69,0,.15); border: 1px solid rgba(255,69,0,.4);
+      color: var(--lava); border-radius: 99px; padding: 5px 14px; font-size: .8rem; font-weight: 600;
+    }
+    .btn-logout {
+      background: transparent; border: 1px solid var(--border-hi); color: var(--text-muted);
+      border-radius: var(--r); padding: 7px 16px; font-size: .84rem; cursor: pointer;
+      transition: border-color var(--t) var(--ease), color var(--t) var(--ease);
+    }
+    .btn-logout:hover { border-color: var(--lava); color: var(--lava); }
+
+    /* ── Login ── */
+    #panel-login {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      min-height: 60vh; gap: 0;
+    }
+    .login-box {
+      background: var(--bg-700); border: 1px solid var(--border-hi);
+      border-radius: var(--r-xl); padding: 40px 36px; width: 100%; max-width: 380px;
+      text-align: center;
+      box-shadow: 0 24px 64px rgba(0,0,0,.5);
+    }
+    .login-icon { font-size: 2.4rem; margin-bottom: 12px; }
+    .login-title { font-family: 'Syne',sans-serif; font-size: 1.3rem; font-weight: 700; margin-bottom: 6px; }
+    .login-sub { color: var(--text-muted); font-size: .88rem; margin-bottom: 24px; }
+    .login-input {
+      width: 100%; background: var(--bg-900); border: 1.5px solid var(--border-hi);
+      border-radius: var(--r); color: var(--text); padding: 12px 16px;
+      font-size: 1rem; outline: none; margin-bottom: 12px;
+      transition: border-color var(--t) var(--ease);
+    }
+    .login-input:focus { border-color: var(--lava); }
+    .login-error { color: var(--lava); font-size: .84rem; min-height: 20px; margin-bottom: 10px; }
+
+    /* ── Tabs ── */
+    .tabs { display: flex; gap: 8px; margin-bottom: 28px; }
+    .tab-btn {
+      background: var(--surface); border: 1px solid var(--border); border-radius: var(--r);
+      color: var(--text-muted); padding: 9px 22px; font-size: .9rem; font-weight: 600;
+      cursor: pointer; transition: all var(--t) var(--ease);
+    }
+    .tab-btn.active { background: var(--lava); border-color: var(--lava); color: #fff; }
+    .tab-btn:not(.active):hover { border-color: var(--border-hi); color: var(--text); }
+
+    /* ── Tables ── */
+    .admin-table-wrap {
+      background: var(--bg-700); border: 1px solid var(--border);
+      border-radius: var(--r-lg); overflow: hidden;
+    }
+    .admin-table { width: 100%; border-collapse: collapse; font-size: .88rem; }
+    .admin-table th {
+      background: var(--bg-600); padding: 13px 16px; text-align: left;
+      color: var(--text-muted); font-weight: 600; font-size: .78rem;
+      text-transform: uppercase; letter-spacing: .05em; border-bottom: 1px solid var(--border);
+    }
+    .admin-table td { padding: 12px 16px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+    .admin-table tr:last-child td { border-bottom: none; }
+    .admin-table tr:hover td { background: var(--surface); }
+    .admin-table .mono { font-family: 'JetBrains Mono', monospace; font-size: .85rem; }
+    .empty-row td { text-align: center; color: var(--text-muted); padding: 40px; }
+
+    /* ── Action buttons ── */
+    .btn-del {
+      background: transparent; border: 1px solid rgba(255,69,0,.4); color: var(--lava);
+      border-radius: 8px; padding: 5px 12px; font-size: .78rem; cursor: pointer;
+      transition: background var(--t) var(--ease);
+    }
+    .btn-del:hover { background: rgba(255,69,0,.18); }
+    .btn-edit {
+      background: transparent; border: 1px solid rgba(0,201,224,.4); color: var(--ocean);
+      border-radius: 8px; padding: 5px 12px; font-size: .78rem; cursor: pointer;
+      transition: background var(--t) var(--ease); margin-right: 6px;
+    }
+    .btn-edit:hover { background: rgba(0,201,224,.12); }
+
+    /* ── Edit modal ── */
+    .edit-overlay {
+      position: fixed; inset: 0; background: rgba(13,13,20,.85); backdrop-filter: blur(6px);
+      display: flex; align-items: center; justify-content: center; z-index: 1000;
+      opacity: 0; pointer-events: none; transition: opacity .25s var(--ease);
+    }
+    .edit-overlay.show { opacity: 1; pointer-events: auto; }
+    .edit-box {
+      background: var(--bg-700); border: 1px solid var(--border-hi); border-radius: var(--r-xl);
+      padding: 32px 28px; max-width: 400px; width: calc(100% - 40px);
+      transform: translateY(12px); transition: transform .3s var(--ease);
+    }
+    .edit-overlay.show .edit-box { transform: translateY(0); }
+    .edit-title { font-family: 'Syne',sans-serif; font-size: 1.1rem; font-weight: 700; margin-bottom: 20px; }
+    .edit-row { margin-bottom: 14px; }
+    .edit-label { display: block; font-size: .8rem; color: var(--text-muted); margin-bottom: 5px; }
+    .edit-input {
+      width: 100%; background: var(--bg-900); border: 1.5px solid var(--border-hi);
+      border-radius: var(--r); color: var(--text); padding: 9px 13px; font-size: .9rem; outline: none;
+      transition: border-color var(--t) var(--ease);
+    }
+    .edit-input:focus { border-color: var(--ocean); }
+    .edit-actions { display: flex; gap: 10px; margin-top: 20px; }
+    .btn-cancel {
+      flex: 1; background: var(--surface); border: 1px solid var(--border); color: var(--text-muted);
+      border-radius: var(--r); padding: 10px; cursor: pointer; font-size: .9rem;
+      transition: background var(--t) var(--ease);
+    }
+    .btn-cancel:hover { background: var(--surface-hi); }
+    .edit-error { color: var(--lava); font-size: .82rem; margin-top: 8px; min-height: 18px; }
+
+    /* ── Stats row ── */
+    .admin-stats { display: flex; gap: 14px; margin-bottom: 24px; flex-wrap: wrap; }
+    .admin-stat {
+      background: var(--bg-700); border: 1px solid var(--border); border-radius: var(--r);
+      padding: 14px 20px; flex: 1; min-width: 120px;
+    }
+    .admin-stat-val { font-family: 'JetBrains Mono', monospace; font-size: 1.4rem; font-weight: 600; color: var(--amber); }
+    .admin-stat-label { font-size: .75rem; color: var(--text-muted); margin-top: 2px; }
+
+    /* ── Section title ── */
+    .section-head {
+      display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;
+    }
+    .section-title { font-weight: 700; font-size: 1rem; }
+    .btn-refresh {
+      background: transparent; border: 1px solid var(--border); color: var(--text-muted);
+      border-radius: var(--r); padding: 6px 13px; font-size: .78rem; cursor: pointer;
+      transition: border-color var(--t) var(--ease), color var(--t) var(--ease);
+    }
+    .btn-refresh:hover { border-color: var(--border-hi); color: var(--text); }
+  </style>
+</head>
+<body>
+
+<!-- ═══ PANNEAU LOGIN ═════════════════════════════════════════ -->
+<div class="admin-wrap" id="panel-login">
+  <div class="login-box">
+    <div class="login-icon">🔧</div>
+    <h2 class="login-title">Panneau Admin</h2>
+    <p class="login-sub">Quiz Réunion · Accès restreint</p>
+    <input
+      type="password"
+      id="admin-pwd"
+      class="login-input"
+      placeholder="Mot de passe admin"
+      autocomplete="current-password"
+    />
+    <div id="login-error" class="login-error"></div>
+    <button class="btn btn-primary" style="width:100%;" id="btn-admin-login">Se connecter →</button>
+    <p style="margin-top:18px;font-size:.8rem;color:var(--text-dim);">
+      <a href="/" style="color:var(--text-muted);text-decoration:none;">← Retour au quiz</a>
+    </p>
+  </div>
+</div>
+
+<!-- ═══ DASHBOARD ═════════════════════════════════════════════ -->
+<div class="admin-wrap" id="panel-dashboard" style="display:none;">
+
+  <!-- Header -->
+  <div class="admin-header">
+    <div style="display:flex;align-items:center;gap:14px;">
+      <span class="admin-title">🔧 Administration</span>
+      <span class="admin-badge">MODE ADMIN</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <a href="/" style="color:var(--text-muted);font-size:.84rem;text-decoration:none;">← Quiz</a>
+      <button class="btn-logout" id="btn-logout">Déconnexion</button>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="users">👤 Utilisateurs</button>
+    <button class="tab-btn" data-tab="scores">🏆 Classement / Scores</button>
+  </div>
+
+  <!-- ── TAB : Utilisateurs ── -->
+  <div id="tab-users">
+    <div class="admin-stats">
+      <div class="admin-stat">
+        <div class="admin-stat-val" id="stat-nb-users">—</div>
+        <div class="admin-stat-label">Joueurs inscrits</div>
+      </div>
+      <div class="admin-stat">
+        <div class="admin-stat-val" id="stat-nb-scores">—</div>
+        <div class="admin-stat-label">Parties jouées</div>
+      </div>
+    </div>
+    <div class="section-head">
+      <span class="section-title">Liste des joueurs</span>
+      <button class="btn-refresh" id="btn-refresh-users">↻ Actualiser</button>
+    </div>
+    <div class="admin-table-wrap">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Pseudo</th>
+            <th>Inscrit le</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="users-body">
+          <tr class="empty-row"><td colspan="4">Chargement…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ── TAB : Scores ── -->
+  <div id="tab-scores" style="display:none;">
+    <div class="section-head">
+      <span class="section-title">Tous les scores (bruts)</span>
+      <button class="btn-refresh" id="btn-refresh-scores">↻ Actualiser</button>
+    </div>
+    <div class="admin-table-wrap">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>#ID</th>
+            <th>Pseudo</th>
+            <th>Score</th>
+            <th>Réponses</th>
+            <th>Durée</th>
+            <th>Date</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="scores-body">
+          <tr class="empty-row"><td colspan="7">Chargement…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══ MODAL ÉDITION SCORE ══════════════════════════════════ -->
+<div id="edit-overlay" class="edit-overlay">
+  <div class="edit-box">
+    <h3 class="edit-title">✏️ Modifier le score</h3>
+    <div class="edit-row">
+      <label class="edit-label">Pseudo</label>
+      <input type="text" id="edit-pseudo" class="edit-input" maxlength="80" />
+    </div>
+    <div class="edit-row">
+      <label class="edit-label">Score (points)</label>
+      <input type="number" id="edit-score" class="edit-input" min="0" />
+    </div>
+    <div class="edit-row">
+      <label class="edit-label">Bonnes réponses</label>
+      <input type="number" id="edit-bonnes" class="edit-input" min="0" />
+    </div>
+    <div class="edit-row">
+      <label class="edit-label">Total questions</label>
+      <input type="number" id="edit-total" class="edit-input" min="0" />
+    </div>
+    <div class="edit-row">
+      <label class="edit-label">Durée (secondes)</label>
+      <input type="number" id="edit-duree" class="edit-input" min="0" />
+    </div>
+    <div id="edit-error" class="edit-error"></div>
+    <div class="edit-actions">
+      <button class="btn-cancel" id="btn-edit-cancel">Annuler</button>
+      <button class="btn btn-primary" style="flex:1;" id="btn-edit-save">Sauvegarder</button>
+    </div>
+  </div>
+</div>
+
+<script src="/js/admin.js"></script>
+</body>
+</html>
