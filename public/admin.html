@@ -1,146 +1,151 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Admin — Quiz Réunion</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔧</text></svg>" />
-  <link rel="stylesheet" href="/css/style.css" />
+<!DOCTYPE html> <!-- Déclaration du type de document HTML5 -->
+<html lang="fr"> <!-- Langue française définie pour l'accessibilité et le SEO -->
+<head> <!-- Section d'en-tête : métadonnées invisibles pour l'utilisateur -->
+  <meta charset="UTF-8" /> <!-- Encodage UTF-8 pour les accents et emojis -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" /> <!-- Adapte l'affichage aux écrans mobiles -->
+  <title>Admin — Quiz Réunion</title> <!-- Titre affiché dans l'onglet du navigateur -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔧</text></svg>" /> <!-- Favicon emoji clé à molette (SVG inline, pas de fichier séparé) -->
+  <link rel="stylesheet" href="/css/style.css" /> <!-- Feuille de style principale (thème volcanique partagé avec le quiz) -->
   <style>
-    /* ── Layout admin ── */
-    .admin-wrap { max-width: 1100px; margin: 0 auto; padding: 30px 24px 80px; }
-    .admin-header {
-      display: flex; align-items: center; justify-content: space-between;
-      margin-bottom: 32px; padding-bottom: 20px;
-      border-bottom: 1px solid var(--border);
-    }
-    .admin-title { font-family: 'Syne', sans-serif; font-size: 1.5rem; font-weight: 700; }
-    .admin-badge {
-      background: rgba(255,69,0,.15); border: 1px solid rgba(255,69,0,.4);
-      color: var(--lava); border-radius: 99px; padding: 5px 14px; font-size: .8rem; font-weight: 600;
-    }
-    .btn-logout {
-      background: transparent; border: 1px solid var(--border-hi); color: var(--text-muted);
-      border-radius: var(--r); padding: 7px 16px; font-size: .84rem; cursor: pointer;
-      transition: border-color var(--t) var(--ease), color var(--t) var(--ease);
-    }
-    .btn-logout:hover { border-color: var(--lava); color: var(--lava); }
+    /* ════════════════════════════════════════════════════════
+       Styles spécifiques au panneau d'administration
+       (complètent /css/style.css sans le modifier)
+       ════════════════════════════════════════════════════════ */
 
-    /* ── Login ── */
-    #panel-login {
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      min-height: 60vh; gap: 0;
+    /* ── Conteneur principal ── */
+    .admin-wrap { max-width: 1100px; margin: 0 auto; padding: 30px 24px 80px; } /* Largeur max centrée avec espacement intérieur */
+    .admin-header { /* Barre d'en-tête du dashboard : logo à gauche, boutons à droite */
+      display: flex; align-items: center; justify-content: space-between; /* Flexbox horizontal avec éléments aux extrémités */
+      margin-bottom: 32px; padding-bottom: 20px; /* Espace sous l'en-tête */
+      border-bottom: 1px solid var(--border); /* Séparateur horizontal discret */
     }
-    .login-box {
-      background: var(--bg-700); border: 1px solid var(--border-hi);
-      border-radius: var(--r-xl); padding: 40px 36px; width: 100%; max-width: 380px;
-      text-align: center;
-      box-shadow: 0 24px 64px rgba(0,0,0,.5);
+    .admin-title { font-family: 'Syne', sans-serif; font-size: 1.5rem; font-weight: 700; } /* Titre principal du dashboard en police Syne */
+    .admin-badge { /* Badge rouge "MODE ADMIN" affiché à côté du titre */
+      background: rgba(255,69,0,.15); border: 1px solid rgba(255,69,0,.4); /* Fond et bordure couleur lave semi-transparents */
+      color: var(--lava); border-radius: 99px; padding: 5px 14px; font-size: .8rem; font-weight: 600; /* Pilule arrondie couleur lave */
     }
-    .login-icon { font-size: 2.4rem; margin-bottom: 12px; }
-    .login-title { font-family: 'Syne',sans-serif; font-size: 1.3rem; font-weight: 700; margin-bottom: 6px; }
-    .login-sub { color: var(--text-muted); font-size: .88rem; margin-bottom: 24px; }
-    .login-input {
-      width: 100%; background: var(--bg-900); border: 1.5px solid var(--border-hi);
-      border-radius: var(--r); color: var(--text); padding: 12px 16px;
-      font-size: 1rem; outline: none; margin-bottom: 12px;
-      transition: border-color var(--t) var(--ease);
+    .btn-logout { /* Bouton de déconnexion dans l'en-tête */
+      background: transparent; border: 1px solid var(--border-hi); color: var(--text-muted); /* Aspect discret par défaut */
+      border-radius: var(--r); padding: 7px 16px; font-size: .84rem; cursor: pointer; /* Coins arrondis et curseur pointeur */
+      transition: border-color var(--t) var(--ease), color var(--t) var(--ease); /* Transition fluide au survol */
     }
-    .login-input:focus { border-color: var(--lava); }
-    .login-error { color: var(--lava); font-size: .84rem; min-height: 20px; margin-bottom: 10px; }
+    .btn-logout:hover { border-color: var(--lava); color: var(--lava); } /* Survol : bordure et texte couleur lave */
 
-    /* ── Tabs ── */
-    .tabs { display: flex; gap: 8px; margin-bottom: 28px; }
-    .tab-btn {
-      background: var(--surface); border: 1px solid var(--border); border-radius: var(--r);
-      color: var(--text-muted); padding: 9px 22px; font-size: .9rem; font-weight: 600;
-      cursor: pointer; transition: all var(--t) var(--ease);
+    /* ── Panneau de connexion ── */
+    #panel-login { /* Conteneur centré de la page de login */
+      display: flex; flex-direction: column; align-items: center; justify-content: center; /* Centrage vertical et horizontal */
+      min-height: 60vh; gap: 0; /* Occupe 60% de la hauteur de la fenêtre */
     }
-    .tab-btn.active { background: var(--lava); border-color: var(--lava); color: #fff; }
-    .tab-btn:not(.active):hover { border-color: var(--border-hi); color: var(--text); }
+    .login-box { /* Carte de connexion avec effet glassmorphism */
+      background: var(--bg-700); border: 1px solid var(--border-hi); /* Fond sombre avec bordure visible */
+      border-radius: var(--r-xl); padding: 40px 36px; width: 100%; max-width: 380px; /* Grands coins arrondis, largeur max 380px */
+      text-align: center; /* Contenu centré */
+      box-shadow: 0 24px 64px rgba(0,0,0,.5); /* Ombre portée profonde pour l'effet de profondeur */
+    }
+    .login-icon { font-size: 2.4rem; margin-bottom: 12px; } /* Grand emoji en haut de la carte de login */
+    .login-title { font-family: 'Syne',sans-serif; font-size: 1.3rem; font-weight: 700; margin-bottom: 6px; } /* Titre de la carte en police Syne */
+    .login-sub { color: var(--text-muted); font-size: .88rem; margin-bottom: 24px; } /* Sous-titre atténué sous le titre */
+    .login-input { /* Champ de saisie du mot de passe admin */
+      width: 100%; background: var(--bg-900); border: 1.5px solid var(--border-hi); /* Pleine largeur, fond très sombre */
+      border-radius: var(--r); color: var(--text); padding: 12px 16px; /* Coins arrondis, texte blanc chaud */
+      font-size: 1rem; outline: none; margin-bottom: 12px; /* Pas de contour natif du navigateur */
+      transition: border-color var(--t) var(--ease); /* Transition fluide du focus */
+    }
+    .login-input:focus { border-color: var(--lava); } /* Bordure lave quand le champ est actif */
+    .login-error { color: var(--lava); font-size: .84rem; min-height: 20px; margin-bottom: 10px; } /* Message d'erreur de connexion en rouge lave */
 
-    /* ── Tables ── */
-    .admin-table-wrap {
-      background: var(--bg-700); border: 1px solid var(--border);
-      border-radius: var(--r-lg); overflow: hidden;
+    /* ── Onglets de navigation ── */
+    .tabs { display: flex; gap: 8px; margin-bottom: 28px; } /* Rangée de boutons d'onglets avec espacement */
+    .tab-btn { /* Bouton d'onglet inactif */
+      background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); /* Fond translucide avec bordure */
+      color: var(--text-muted); padding: 9px 22px; font-size: .9rem; font-weight: 600; /* Texte atténué semi-gras */
+      cursor: pointer; transition: all var(--t) var(--ease); /* Transition fluide sur toutes les propriétés */
     }
-    .admin-table { width: 100%; border-collapse: collapse; font-size: .88rem; }
-    .admin-table th {
-      background: var(--bg-600); padding: 13px 16px; text-align: left;
-      color: var(--text-muted); font-weight: 600; font-size: .78rem;
-      text-transform: uppercase; letter-spacing: .05em; border-bottom: 1px solid var(--border);
-    }
-    .admin-table td { padding: 12px 16px; border-bottom: 1px solid var(--border); vertical-align: middle; }
-    .admin-table tr:last-child td { border-bottom: none; }
-    .admin-table tr:hover td { background: var(--surface); }
-    .admin-table .mono { font-family: 'JetBrains Mono', monospace; font-size: .85rem; }
-    .empty-row td { text-align: center; color: var(--text-muted); padding: 40px; }
+    .tab-btn.active { background: var(--lava); border-color: var(--lava); color: #fff; } /* Onglet actif : fond rouge lave, texte blanc */
+    .tab-btn:not(.active):hover { border-color: var(--border-hi); color: var(--text); } /* Survol des onglets inactifs : bordure plus visible */
 
-    /* ── Action buttons ── */
-    .btn-del {
-      background: transparent; border: 1px solid rgba(255,69,0,.4); color: var(--lava);
-      border-radius: 8px; padding: 5px 12px; font-size: .78rem; cursor: pointer;
-      transition: background var(--t) var(--ease);
+    /* ── Tableau admin ── */
+    .admin-table-wrap { /* Conteneur avec bordures arrondies pour les tableaux */
+      background: var(--bg-700); border: 1px solid var(--border); /* Fond sombre avec bordure */
+      border-radius: var(--r-lg); overflow: hidden; /* Coins arrondis + masquage du débordement des cellules */
     }
-    .btn-del:hover { background: rgba(255,69,0,.18); }
-    .btn-edit {
-      background: transparent; border: 1px solid rgba(0,201,224,.4); color: var(--ocean);
-      border-radius: 8px; padding: 5px 12px; font-size: .78rem; cursor: pointer;
-      transition: background var(--t) var(--ease); margin-right: 6px;
+    .admin-table { width: 100%; border-collapse: collapse; font-size: .88rem; } /* Tableau pleine largeur sans double bordures */
+    .admin-table th { /* Cellule d'en-tête du tableau */
+      background: var(--bg-600); padding: 13px 16px; text-align: left; /* Fond légèrement plus clair, alignement gauche */
+      color: var(--text-muted); font-weight: 600; font-size: .78rem; /* Texte atténué, petite taille */
+      text-transform: uppercase; letter-spacing: .05em; border-bottom: 1px solid var(--border); /* Majuscules espacées + séparateur bas */
     }
-    .btn-edit:hover { background: rgba(0,201,224,.12); }
+    .admin-table td { padding: 12px 16px; border-bottom: 1px solid var(--border); vertical-align: middle; } /* Cellule de donnée avec séparateur horizontal */
+    .admin-table tr:last-child td { border-bottom: none; } /* Supprime le séparateur de la dernière ligne (évite le double bord) */
+    .admin-table tr:hover td { background: var(--surface); } /* Surlignage discret de la ligne au survol */
+    .admin-table .mono { font-family: 'JetBrains Mono', monospace; font-size: .85rem; } /* Classe utilitaire pour les valeurs en police monospace (IDs, scores) */
+    .empty-row td { text-align: center; color: var(--text-muted); padding: 40px; } /* Ligne vide centrée (affiché pendant le chargement ou si aucune donnée) */
 
-    /* ── Edit modal ── */
-    .edit-overlay {
-      position: fixed; inset: 0; background: rgba(13,13,20,.85); backdrop-filter: blur(6px);
-      display: flex; align-items: center; justify-content: center; z-index: 1000;
-      opacity: 0; pointer-events: none; transition: opacity .25s var(--ease);
+    /* ── Boutons d'action ── */
+    .btn-del { /* Bouton rouge "Supprimer" */
+      background: transparent; border: 1px solid rgba(255,69,0,.4); color: var(--lava); /* Fond transparent, bordure et texte couleur lave */
+      border-radius: 8px; padding: 5px 12px; font-size: .78rem; cursor: pointer; /* Compact et cliquable */
+      transition: background var(--t) var(--ease); /* Transition du fond au survol */
     }
-    .edit-overlay.show { opacity: 1; pointer-events: auto; }
-    .edit-box {
-      background: var(--bg-700); border: 1px solid var(--border-hi); border-radius: var(--r-xl);
-      padding: 32px 28px; max-width: 400px; width: calc(100% - 40px);
-      transform: translateY(12px); transition: transform .3s var(--ease);
+    .btn-del:hover { background: rgba(255,69,0,.18); } /* Survol : fond rouge lave semi-transparent */
+    .btn-edit { /* Bouton bleu "Modifier" */
+      background: transparent; border: 1px solid rgba(0,201,224,.4); color: var(--ocean); /* Bordure et texte couleur océan */
+      border-radius: 8px; padding: 5px 12px; font-size: .78rem; cursor: pointer; /* Compact et cliquable */
+      transition: background var(--t) var(--ease); margin-right: 6px; /* Espace entre modifier et supprimer */
     }
-    .edit-overlay.show .edit-box { transform: translateY(0); }
-    .edit-title { font-family: 'Syne',sans-serif; font-size: 1.1rem; font-weight: 700; margin-bottom: 20px; }
-    .edit-row { margin-bottom: 14px; }
-    .edit-label { display: block; font-size: .8rem; color: var(--text-muted); margin-bottom: 5px; }
-    .edit-input {
-      width: 100%; background: var(--bg-900); border: 1.5px solid var(--border-hi);
-      border-radius: var(--r); color: var(--text); padding: 9px 13px; font-size: .9rem; outline: none;
-      transition: border-color var(--t) var(--ease);
-    }
-    .edit-input:focus { border-color: var(--ocean); }
-    .edit-actions { display: flex; gap: 10px; margin-top: 20px; }
-    .btn-cancel {
-      flex: 1; background: var(--surface); border: 1px solid var(--border); color: var(--text-muted);
-      border-radius: var(--r); padding: 10px; cursor: pointer; font-size: .9rem;
-      transition: background var(--t) var(--ease);
-    }
-    .btn-cancel:hover { background: var(--surface-hi); }
-    .edit-error { color: var(--lava); font-size: .82rem; margin-top: 8px; min-height: 18px; }
+    .btn-edit:hover { background: rgba(0,201,224,.12); } /* Survol : fond bleu océan très subtil */
 
-    /* ── Stats row ── */
-    .admin-stats { display: flex; gap: 14px; margin-bottom: 24px; flex-wrap: wrap; }
-    .admin-stat {
-      background: var(--bg-700); border: 1px solid var(--border); border-radius: var(--r);
-      padding: 14px 20px; flex: 1; min-width: 120px;
+    /* ── Modal de modification d'un score ── */
+    .edit-overlay { /* Overlay plein écran semi-transparent */
+      position: fixed; inset: 0; background: rgba(13,13,20,.85); backdrop-filter: blur(6px); /* Fixé à la fenêtre, fond sombre + flou */
+      display: flex; align-items: center; justify-content: center; z-index: 1000; /* Centrage du contenu, au-dessus de tout */
+      opacity: 0; pointer-events: none; transition: opacity .25s var(--ease); /* Invisible et non-interactif par défaut */
     }
-    .admin-stat-val { font-family: 'JetBrains Mono', monospace; font-size: 1.4rem; font-weight: 600; color: var(--amber); }
-    .admin-stat-label { font-size: .75rem; color: var(--text-muted); margin-top: 2px; }
+    .edit-overlay.show { opacity: 1; pointer-events: auto; } /* Classe ajoutée par JS pour afficher le modal */
+    .edit-box { /* Boîte de formulaire du modal */
+      background: var(--bg-700); border: 1px solid var(--border-hi); border-radius: var(--r-xl); /* Fond sombre, bordure visible, grands coins */
+      padding: 32px 28px; max-width: 400px; width: calc(100% - 40px); /* Espacement intérieur, largeur max responsive */
+      transform: translateY(12px); transition: transform .3s var(--ease); /* Décalage initial pour l'animation d'ouverture */
+    }
+    .edit-overlay.show .edit-box { transform: translateY(0); } /* La boîte remonte à sa position finale lors de l'ouverture */
+    .edit-title { font-family: 'Syne',sans-serif; font-size: 1.1rem; font-weight: 700; margin-bottom: 20px; } /* Titre du modal en police Syne */
+    .edit-row { margin-bottom: 14px; } /* Espace entre chaque groupe label + input */
+    .edit-label { display: block; font-size: .8rem; color: var(--text-muted); margin-bottom: 5px; } /* Label au-dessus du champ, texte atténué */
+    .edit-input { /* Champ de saisie dans le modal */
+      width: 100%; background: var(--bg-900); border: 1.5px solid var(--border-hi); /* Pleine largeur, fond très sombre */
+      border-radius: var(--r); color: var(--text); padding: 9px 13px; font-size: .9rem; outline: none; /* Coins arrondis, pas de contour natif */
+      transition: border-color var(--t) var(--ease); /* Transition fluide du focus */
+    }
+    .edit-input:focus { border-color: var(--ocean); } /* Bordure bleue océan quand le champ est actif */
+    .edit-actions { display: flex; gap: 10px; margin-top: 20px; } /* Rangée de boutons en bas du modal */
+    .btn-cancel { /* Bouton "Annuler" du modal */
+      flex: 1; background: var(--surface); border: 1px solid var(--border); color: var(--text-muted); /* Prend la moitié de la largeur, aspect discret */
+      border-radius: var(--r); padding: 10px; cursor: pointer; font-size: .9rem; /* Coins arrondis, taille normale */
+      transition: background var(--t) var(--ease); /* Transition du fond au survol */
+    }
+    .btn-cancel:hover { background: var(--surface-hi); } /* Survol : fond légèrement plus visible */
+    .edit-error { color: var(--lava); font-size: .82rem; margin-top: 8px; min-height: 18px; } /* Message d'erreur de validation du formulaire */
 
-    /* ── Section title ── */
-    .section-head {
-      display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;
+    /* ── Cartes statistiques ── */
+    .admin-stats { display: flex; gap: 14px; margin-bottom: 24px; flex-wrap: wrap; } /* Rangée de cartes avec retour à la ligne si nécessaire */
+    .admin-stat { /* Carte statistique individuelle (ex: nombre de joueurs) */
+      background: var(--bg-700); border: 1px solid var(--border); border-radius: var(--r); /* Fond sombre avec bordure et coins arrondis */
+      padding: 14px 20px; flex: 1; min-width: 120px; /* S'étire uniformément, largeur minimum 120px */
     }
-    .section-title { font-weight: 700; font-size: 1rem; }
-    .btn-refresh {
-      background: transparent; border: 1px solid var(--border); color: var(--text-muted);
-      border-radius: var(--r); padding: 6px 13px; font-size: .78rem; cursor: pointer;
-      transition: border-color var(--t) var(--ease), color var(--t) var(--ease);
+    .admin-stat-val { font-family: 'JetBrains Mono', monospace; font-size: 1.4rem; font-weight: 600; color: var(--amber); } /* Grande valeur numérique en ambre (couleur premium) */
+    .admin-stat-label { font-size: .75rem; color: var(--text-muted); margin-top: 2px; } /* Label atténué sous la valeur */
+
+    /* ── En-tête de section ── */
+    .section-head { /* Rangée titre + bouton actualiser */
+      display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; /* Flexbox avec éléments aux extrémités */
     }
-    .btn-refresh:hover { border-color: var(--border-hi); color: var(--text); }
+    .section-title { font-weight: 700; font-size: 1rem; } /* Titre de section en gras */
+    .btn-refresh { /* Bouton "↻ Actualiser" */
+      background: transparent; border: 1px solid var(--border); color: var(--text-muted); /* Aspect discret */
+      border-radius: var(--r); padding: 6px 13px; font-size: .78rem; cursor: pointer; /* Compact et cliquable */
+      transition: border-color var(--t) var(--ease), color var(--t) var(--ease); /* Transition fluide au survol */
+    }
+    .btn-refresh:hover { border-color: var(--border-hi); color: var(--text); } /* Survol : bordure et texte plus visibles */
   </style>
 </head>
 <body> <!-- Corps de la page admin : contient le panneau login et le tableau de bord -->
